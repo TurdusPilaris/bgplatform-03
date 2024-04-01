@@ -1,12 +1,15 @@
 import jwt from 'jsonwebtoken'
 import {ObjectId} from "mongodb";
+import {PayloadTokenType} from "../../input-output-types/common/common-types";
 
 export const jwtService = {
 
-    async createToken(userId: ObjectId, expiresTime: string, SECRET_CODE: string) {
+    async createToken(payload:PayloadTokenType, expiresTime: string, SECRET_CODE: string) {
 
+        console.log("payload",payload)
         return jwt.sign(
-            {userId: userId},
+            payload,
+            // {userId: userId},
             SECRET_CODE,
             {
                 expiresIn: expiresTime
@@ -22,13 +25,15 @@ export const jwtService = {
           return null;
       }
     },
-    async getUserIdByToken(token: string, secretCode:string):Promise<ObjectId|null> {
-
+    async verifyAndGetPayloadToken(token: string, secretCode:string):Promise<PayloadTokenType|null> {
 
         try {
             const result: any = jwt.verify(token, secretCode)
-            return result.userId;
+            if(result.deviceId){
+                return {userId: result.userId, deviceId: result.deviceId}
+            } else return {userId: result.userId};
         } catch (error) {
+            console.log("Not verify!")
             return null
         }
     }

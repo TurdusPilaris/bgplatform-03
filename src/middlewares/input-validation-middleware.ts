@@ -5,6 +5,9 @@ import {ObjectId} from "mongodb";
 import {userQueryRepository} from "../features/users/repositories/userQueryRepository";
 import {authService} from "../features/auth/domain/auth-service";
 import {ResultStatus} from "../common/types/resultCode";
+import {customRateLimit} from "../db/mongo-db";
+import {CustomRateLimitType} from "../input-output-types/common/common-types";
+import {add} from "date-fns";
 
 export const inputValidationMiddleware = (req:Request, res: Response, next: NextFunction): any => {
 
@@ -103,7 +106,6 @@ export const authMiddlewareBearer = async (req:Request, res: Response, next: Nex
         return;
     }
 
-    console.log("Bearer---------", req.headers.authorization)
     const result = await authService.checkAccessToken(req.headers.authorization);
 
     if(result.status === ResultStatus.Success){
@@ -126,11 +128,13 @@ export const authMiddlewareRefreshToken = async (req:Request, res: Response, nex
         return;
     }
 
+    console.log("req.cookies.refreshToken", req.cookies.refreshToken)
+
     const result = await authService.checkRefreshToken(req.cookies.refreshToken)
 
-    console.log("result----", result)
     if(result.status === ResultStatus.Success){
-        req.userId = result.data!.toString();
+        req.userId = result.data!.userId.toString();
+        req.deviceId = result.data!.deviceId!.toString();
         return next();
     }
 
@@ -156,8 +160,6 @@ export const userInputValidator =
         body('email').isEmail().withMessage('Invalid email'),
         body('login').custom(async value => {
             const countDocuments = await userQueryRepository.getCountDocumentWithFilter(value, undefined);
-
-            console.log("count documents " + countDocuments)
             if (countDocuments > 0) {
                 throw new Error('login is not unique')
             }
@@ -165,7 +167,6 @@ export const userInputValidator =
         ,
         body('email').custom(async value => {
             const countDocuments = await userQueryRepository.getCountDocumentWithFilter(undefined, value);
-            console.log("count documents email " + countDocuments)
             if (countDocuments > 0 && value.length>0) {
                 throw new Error('email is not unique')
             }
@@ -177,3 +178,32 @@ export const commentInputValidator =
     [
         body('content').trim().isLength({min: 20, max: 300}).withMessage('Content should be from 20 to 300'),
     ]
+
+export const apiRequestLimitMiddleware = async (req:Request, res: Response, next: NextFunction) => {
+
+    const filterCustomRate = {
+        IP: req.ip,
+        URL: req.baseUrl,
+        date:{$gte: add(new Date(), {
+                seconds: -11
+            })}
+    }
+    const countCustomRate = await customRateLimit.countDocuments(filterCustomRate);
+
+    if(countCustomRate > 5) {
+        res.sendStatus(429);
+        return;
+    }
+
+    const apiInformation: CustomRateLimitType = {
+        _id: new ObjectId(),
+        IP: req.ip,
+        URL: req.baseUrl,
+        date: new Date()
+    }
+
+    await customRateLimit.insertOne({_id: new ObjectId(), IP: req.ip, URL: req.baseUrl,date: new Date() });
+
+    return next();
+
+}

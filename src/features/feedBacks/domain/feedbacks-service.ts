@@ -10,9 +10,8 @@ export const feedbacksService = {
 
     async createComment(comment: string, postId: string, userId: string) {
 
-        console.log("Im in feedback service")
         const user = await userQueryRepository.findForOutput(new ObjectId(userId));
-        console.log("Im in feedback service user")
+
         const commentInput: CommentDBMongoTypeWithoutID = {
             content: comment,
             postId: postId,

@@ -10,7 +10,8 @@ import {ResultStatus} from "../../../common/types/resultCode";
 import {businessService} from "../../../common/domain/business-service";
 import {jwtService} from "../../../common/adapters/jwt-service";
 import {SETTING} from "../../../main/setting";
-import {blackListCollection} from "../../../db/mongo-db";
+import {blackListCollection, deviceAuthSessions, userCollection} from "../../../db/mongo-db";
+import {DeviceAuthSessionsType, PayloadTokenType} from "../../../input-output-types/common/common-types";
 
 export const authService = {
 
@@ -40,7 +41,7 @@ export const authService = {
         }
         const createdUser = await userMongoRepository.create(newUser);
 
-        if(!createdUser) return {
+        if (!createdUser) return {
             status: ResultStatus.BadRequest,
             errorField: 'code',
             errorMessage: 'Not found user',
@@ -90,7 +91,7 @@ export const authService = {
             data: null
         }
     },
-    async resendingEmail(email:string):Promise<ResultObject> {
+    async resendingEmail(email: string): Promise<ResultObject> {
 
         const user = await userQueryRepository.findByLoginOrEmail(email);
 
@@ -101,8 +102,8 @@ export const authService = {
             data: null
         }
 
-        const newConfirmationCode =  uuidv4();
-         await userMongoRepository.updateConfirmationCode(user._id, newConfirmationCode, add(new Date(), {
+        const newConfirmationCode = uuidv4();
+        await userMongoRepository.updateConfirmationCode(user._id, newConfirmationCode, add(new Date(), {
             hours: 1,
             minutes: 3
         }))
@@ -118,20 +119,20 @@ export const authService = {
             data: null
         }
     },
-    async checkAccessToken(authHeader:string):Promise<ResultObject<ObjectId|null>> {
+    async checkAccessToken(authHeader: string): Promise<ResultObject<ObjectId | null>> {
 
         const auth = authHeader.split(" ");
-        if(auth[0]!=='Bearer') return {
+        if (auth[0] !== 'Bearer') return {
 
-                 status: ResultStatus.Unauthorized,
-                 errorField: 'access token',
-                 errorMessage: 'Wrong authorization',
-                 data: null
+            status: ResultStatus.Unauthorized,
+            errorField: 'access token',
+            errorMessage: 'Wrong authorization',
+            data: null
 
         }
-        const userId = await jwtService.getUserIdByToken(auth[1], SETTING.JWT_SECRET);
+        const payloadAccessToken = await jwtService.verifyAndGetPayloadToken(auth[1], SETTING.JWT_SECRET);
 
-        if(!userId) return {
+        if (!payloadAccessToken) return {
 
             status: ResultStatus.Unauthorized,
             errorField: 'access token',
@@ -140,9 +141,9 @@ export const authService = {
 
         }
 
-         const user = await userQueryRepository.findForOutput(new ObjectId(userId));
+        const user = await userQueryRepository.findForOutput(new ObjectId(payloadAccessToken.userId));
 
-        if(!user) return {
+        if (!user) return {
 
             status: ResultStatus.Unauthorized,
             errorField: 'user id',
@@ -154,17 +155,20 @@ export const authService = {
         return {
 
             status: ResultStatus.Success,
-            data: userId
+            data: payloadAccessToken.userId
 
         }
 
     },
-    async checkRefreshToken(refreshToken:string):Promise<ResultObject<ObjectId|null>> {
+    async checkRefreshToken(refreshToken: string): Promise<ResultObject<PayloadTokenType | null>> {
 
-        const userId = await jwtService.getUserIdByToken(refreshToken, SETTING.JWT_REFRESH_SECRET);
+        const payloadRefreshToken = await jwtService.verifyAndGetPayloadToken(refreshToken, SETTING.JWT_REFRESH_SECRET);
 
+        const fullPayload = await jwtService.decodeToken(refreshToken);
 
-        if(!userId) return {
+        console.log("payloadRefreshToken", fullPayload)
+
+        if (!payloadRefreshToken) return {
 
             status: ResultStatus.Unauthorized,
             errorField: 'Refresh token',
@@ -173,21 +177,9 @@ export const authService = {
 
         }
 
-        const blackList = await this.getRefreshTokenBlackList(refreshToken, userId);
+        const user = await userQueryRepository.findForOutput(new ObjectId(payloadRefreshToken.userId))
 
-        if(blackList) {
-            return {
-            status: ResultStatus.Unauthorized,
-                errorField: 'Refresh token',
-                errorMessage: 'Refresh token in black list',
-                data: null
-
-            }
-        }
-
-        const user = await userQueryRepository.findForOutput(userId)
-
-        if (user) {
+        if (!user) {
 
             return {
 
@@ -198,42 +190,90 @@ export const authService = {
 
             }
         }
-        if (!userId) {
+
+        const session = await this.getSession(payloadRefreshToken.userId.toString(), payloadRefreshToken.deviceId!, new Date(fullPayload.iat*1000));
+
+        console.log("session", session);
+
+        if (!session) {
 
             return {
 
                 status: ResultStatus.Unauthorized,
-                errorField: 'access token',
-                errorMessage: 'Wrong access token',
+                errorField: 'session',
+                errorMessage: 'Not found session',
                 data: null
 
             }
         }
 
-        await this.updateBlackList(refreshToken, userId);
-
         return {
 
             status: ResultStatus.Success,
-            data: userId
+            data: payloadRefreshToken
 
         }
 
     },
-    async getRefreshTokenBlackList(refreshToken:string, userId:ObjectId):Promise<BlackListDBMongoType|null> {
+    async getRefreshTokenBlackList(refreshToken: string, userId: ObjectId): Promise<BlackListDBMongoType | null> {
 
-        return await blackListCollection.findOne({userId: userId.toString(),refreshToken: refreshToken });
+        return await blackListCollection.findOne({userId: userId.toString(), refreshToken: refreshToken});
 
-    }
-    ,
-    async updateBlackList(refreshToken:string, userId:ObjectId) {
+    },
+    async updateBlackList(refreshToken: string, userId: ObjectId) {
 
         try {
-            await blackListCollection.insertOne({_id: new ObjectId(), refreshToken: refreshToken, userId: userId.toString()});
+            await blackListCollection.insertOne({
+                _id: new ObjectId(),
+                refreshToken: refreshToken,
+                userId: userId.toString()
+            });
         } catch (e) {
 
         }
 
+    },
+
+    async updateToken(refreshToken: string){
+
+        const payloadOldRefreshToken = await jwtService.decodeToken(refreshToken);
+        const session = await this.getSession(payloadOldRefreshToken.userId, payloadOldRefreshToken.deviceId!, new Date(payloadOldRefreshToken.iat*1000));
+
+        const newDeviceId = uuidv4();
+
+        const payLoadRefreshToken: PayloadTokenType = {userId: payloadOldRefreshToken.userId, deviceId: payloadOldRefreshToken.deviceId!};
+        const newRefreshToken = await jwtService.createToken(payLoadRefreshToken, SETTING.AC_REFRESH_TIME, SETTING.JWT_REFRESH_SECRET);
+        const newPayloadRefreshToken = await jwtService.decodeToken(newRefreshToken);
+
+        try {
+            console.log("session!._id", session!._id)
+            console.log("дата iat", new Date(newPayloadRefreshToken.iat*1000))
+            console.log("дата exp", new Date(newPayloadRefreshToken.exp*1000))
+            await this.updateSession(session!._id, new Date(newPayloadRefreshToken.iat*1000), new Date(newPayloadRefreshToken.exp*1000));
+        } catch (e) {
+            console.log("session!._id", session!._id)
+            console.log("дата iat", new Date(newPayloadRefreshToken.iat*1000))
+            console.log("дата exp", new Date(newPayloadRefreshToken.exp*1000))
+            console.log("this error", e)
+        }
+
+
+        return newRefreshToken;
+
+    },
+    async getSession(userId: string, deviceId: string, iat: Date){
+
+        return deviceAuthSessions.findOne({userId: userId, deviceId: deviceId, iat: iat});
+
+    },
+    async updateSession(_id: ObjectId, iat: Date, exp: Date){
+
+       await deviceAuthSessions.updateOne({_id: _id}, {
+            $set: {
+                iat: iat,
+                exp: exp
+            }
+        })
     }
 }
 

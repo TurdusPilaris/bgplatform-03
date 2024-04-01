@@ -4,10 +4,13 @@ import {jwtService} from "../../../common/adapters/jwt-service";
 import {LoginSuccessViewModelType} from "../../../input-output-types/auth/outoutTypes";
 import {SETTING} from "../../../main/setting";
 import {authService} from "../domain/auth-service";
+import {securityService} from "../../security/domain/security-service";
+
 export const postLogOutControllers = async (req: Request<LoginInputType>, res: Response<LoginSuccessViewModelType>) => {
 
-    const userId = await jwtService.getUserIdByToken(req.cookies.refreshToken, SETTING.JWT_REFRESH_SECRET);
-    await authService.updateBlackList(req.cookies.refreshToken, userId!);
+    const payload = await jwtService.decodeToken(req.cookies.refreshToken);
+
+    await securityService.dropCurrentSession(payload.userId!, payload.deviceId!)
 
     res.sendStatus(204);
 }

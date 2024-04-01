@@ -1,5 +1,4 @@
 import {
-    BlogDBMongoType,
     BlogDBMongoTypeWithoutID,
     PostDBMongoTypeWithoutID,
     UserAccountDBMongoType
@@ -8,9 +7,7 @@ import {RegisterUserType} from "./types/typesTests";
 import {ObjectId} from "mongodb";
 import {v4 as uuidv4} from "uuid";
 import {add} from "date-fns";
-import {userMongoRepository} from "../src/features/users/repositories/usersMongoRepositories";
 import {userCollection} from "../src/db/mongo-db";
-import {TypeBlogViewModel} from "../src/input-output-types/blogs/outputTypes";
 import {TypeBlogInputModel} from "../src/input-output-types/blogs/inputTypes";
 import {TypePostInputModelModel} from "../src/input-output-types/posts/inputTypes";
 

@@ -5,6 +5,7 @@ import {
     BlogDBMongoTypeWithoutID, CommentDBMongoTypeWithoutID,
     PostDBMongoTypeWithoutID, UserAccountDBMongoType,
 } from "../input-output-types/inputOutputTypesMongo";
+import {CustomRateLimitType, DeviceAuthSessionsType} from "../input-output-types/common/common-types";
 // const MONGO_URL="mongodb+srv://drozdovaElena:WIMUTynaAxzPoowP@cluster0.qxhqyca.mongodb.net/?retryWrites=true&w=majority"
 
 console.log("MONGO URL" + SETTING.MONGO_URL)
@@ -52,7 +53,8 @@ export const postCollection = db.getDBName().collection<PostDBMongoTypeWithoutID
 export const userCollection = db.getDBName().collection<UserAccountDBMongoType>(SETTING.USER_COLLECTION_NAME);
 export const commentCollection = db.getDBName().collection<CommentDBMongoTypeWithoutID>(SETTING.COMMENT_COLLECTION_NAME);
 export const blackListCollection = db.getDBName().collection<BlackListDBMongoType>(SETTING.BLACK_LIST_COLLECTION_NAME);
-
+export const customRateLimit  = db.getDBName().collection<CustomRateLimitType>(SETTING.CUSTOM_RATE_LIMIT_COLLECTION_NAME);
+export const deviceAuthSessions = db.getDBName().collection<DeviceAuthSessionsType>(SETTING.DEVICE_AUTH_SESSION_COLLECTION_NAME);
 // export const connectionToDB = async () => {
 //     try {
 //         await client.connect();

@@ -7,6 +7,8 @@ import {usersRouter} from "../features/users";
 import {authRouter} from "../features/auth/auth-router";
 import {SETTING} from "./setting";
 import {feedbackRouter} from "../features/feedBacks/feedbackRouter";
+import {apiRequestLimitMiddleware} from "../middlewares/input-validation-middleware";
+import {securityRouter} from "../features/security";
 
 
 
@@ -15,11 +17,11 @@ export const addRoutes = (app: Express) => {
     app.use(SETTING.PATH_POSTS, postsRouter);
     app.use(SETTING.PATH_BLOGS, blogsRouter);
     app.use(SETTING.PATH_USERS, usersRouter);
+    app.use(SETTING.PATH_SECURITY, securityRouter);
     app.use(SETTING.PATH_AUTH, authRouter);
     app.use(SETTING.PATH_COMMENT, feedbackRouter);
     app.get('/', (req: Request, res: Response) => {
         res.send('Hello Samurai')
     });
-
 
 }

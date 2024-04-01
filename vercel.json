@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "bgplatform-02-01",
+  "name": "bgplatform-03",
   "builds": [
     { "src": "src/index.ts", "use": "@vercel/node" }
   ],
