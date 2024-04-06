@@ -1,4 +1,4 @@
-import {commentCollection} from "../../../db/mongo-db";
+import {commentCollection} from "../../../db/mongo/mongo-db";
 import {
     CommentDBMongoType,
     CommentDBMongoTypeWithoutID,

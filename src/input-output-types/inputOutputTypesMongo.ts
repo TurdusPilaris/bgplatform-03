@@ -52,23 +52,12 @@ export type EmailConfirmationType = {
     isConfirmed: boolean;
 }
 export type BlogDBMongoType = {
-    _id: ObjectId;
-    name: string;
-    description: string;
-    websiteUrl: string;
-    createdAt: string;
-    isMembership: boolean;
-
-}
-
-export type BlogDBMongoTypeWithoutID = {
     name: string;
     description: string;
     websiteUrl: string;
     createdAt: string;
     isMembership: boolean;
 }
-
 
 export type InsertedInfoType = {
     "acknowledged": boolean,

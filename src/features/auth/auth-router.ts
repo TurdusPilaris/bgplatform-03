@@ -16,7 +16,7 @@ import {postLogOutControllers} from "./controllers/postLogOutController";
 export const authRouter = Router({})
 
 authRouter.post('/login', apiRequestLimitMiddleware, postLoginAuthControllers)
-authRouter.post('/registration', userInputValidator, apiRequestLimitMiddleware, inputValidationMiddleware, postRegistrationControllers)
+authRouter.post('/registration', apiRequestLimitMiddleware, userInputValidator, inputValidationMiddleware, postRegistrationControllers)
 authRouter.post('/registration-confirmation', apiRequestLimitMiddleware, postRegisrtationConfirmationController)
 authRouter.post('/registration-email-resending', apiRequestLimitMiddleware, emailInputValidator, inputValidationMiddleware, postRegistrationEmailResendingController)
 authRouter.get('/me', authMiddlewareBearer, getInformationMe)

@@ -8,6 +8,7 @@ const first = {
     terminal07: 'yarn add nodemailer',
     terminal08: 'yarn add cookie-parser',
     terminal09: 'yarn add @types/cookie-parser --dev',
+    terminal10: 'yarn add mongoose'
 }
 // 1.6 предпочтительное содержимое tsconfig.json
 //  {

@@ -10,7 +10,7 @@ import {ResultStatus} from "../../../common/types/resultCode";
 import {businessService} from "../../../common/domain/business-service";
 import {jwtService} from "../../../common/adapters/jwt-service";
 import {SETTING} from "../../../main/setting";
-import {blackListCollection, deviceAuthSessions, userCollection} from "../../../db/mongo-db";
+import {blackListCollection, deviceAuthSessions, userCollection} from "../../../db/mongo/mongo-db";
 import {DeviceAuthSessionsType, PayloadTokenType} from "../../../input-output-types/common/common-types";
 
 export const authService = {

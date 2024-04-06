@@ -4,7 +4,7 @@ import {
     commentCollection,
     postCollection,
     userCollection
-} from "../../../db/mongo-db";
+} from "../../../db/mongo/mongo-db";
 
 export const testingRepository ={
 

@@ -1,30 +1,40 @@
 import {blogsMongoRepository} from "../repositories/blogsMongoRepository";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {BlogDBMongoType, PostDBMongoTypeWithoutID,} from "../../../input-output-types/inputOutputTypesMongo";
-import {blogCollection} from "../../../db/mongo-db";
-import {TypeBlogInputModel} from "../../../input-output-types/blogs/inputTypes";
-import {PaginatorBlogType, TypeBlogViewModel} from "../../../input-output-types/blogs/outputTypes";
+import {blogCollection} from "../../../db/mongo/mongo-db";
+import {TypeBlogInputModel} from "../types/inputTypes";
+import {PaginatorBlogType, TypeBlogViewModel} from "../types/outputTypes";
 import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTypes";
 import {postsMongoRepository} from "../../posts/repositories/postMongoRepository";
 import {ResultObject} from "../../../common/types/result.types";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {HelperQueryTypeBlog} from "../../../input-output-types/inputTypes";
 import {blogQueryRepository} from "../repositories/blogQueryRepository";
+import {BlogModel} from "../../../db/mongo/blog/blog.model";
+import {blogsMongooseRepository} from "../repositories/blogsMongooseRepository";
 
 export const blogsService = {
 
-    async create(input: TypeBlogInputModel) {
+    async create(dto: TypeBlogInputModel) {
 
-        const newBlog = {
-            name: input.name,
-            description: input.description,
-            websiteUrl: input.websiteUrl,
-            createdAt: new Date().toISOString(),
-            isMembership: false
+        const newBlog = new BlogModel(dto);
+        // newBlog.name = dto.name;
+        // newBlog.description = dto.description;
+        // newBlog.websiteUrl = dto.websiteUrl;
+        newBlog.createdAt = new Date().toISOString();
+        newBlog.isMembership = false;
 
-        }
-
-        return blogsMongoRepository.create(newBlog);
+        return blogsMongooseRepository.save(newBlog);
+        // const newBlog = {
+        //     name: input.name,
+        //     description: input.description,
+        //     websiteUrl: input.websiteUrl,
+        //     createdAt: new Date().toISOString(),
+        //     isMembership: false
+        //
+        // }
+        //
+        // return blogsMongoRepository.create(newBlog);
 
     },
 
@@ -53,10 +63,11 @@ export const blogsService = {
     },
     findForOutput: async function (id: ObjectId) {
 
-        return blogsMongoRepository.findForOutput(id);
+        // return blogsMongoRepository.findForOutput(id);
+        return blogsMongooseRepository.findForOutput(id);
 
     },
-    mapToOutput(blog: BlogDBMongoType): TypeBlogViewModel {
+    mapToOutput(blog: WithId<BlogDBMongoType>): TypeBlogViewModel {
         return {
             id: blog._id.toString(),
             name: blog.name,
@@ -75,7 +86,17 @@ export const blogsService = {
             }
         }
 
-        const foundedBlog = await this.find(new ObjectId(id))
+        //OLD
+        // const foundedBlog = await this.find(new ObjectId(id))
+        // if (!foundedBlog) {
+        //     return {
+        //         status: ResultStatus.NotFound,
+        //         data: null
+        //     }
+        // }
+
+        //NEW with mongoose
+        const foundedBlog = await blogsMongooseRepository.findById(new ObjectId(id));
         if (!foundedBlog) {
             return {
                 status: ResultStatus.NotFound,
@@ -83,9 +104,9 @@ export const blogsService = {
             }
         }
 
-        await blogsMongoRepository.updateBlog(new ObjectId(id), input);
+        await blogsMongooseRepository.updateBlog(foundedBlog, input);
 
-        const foundBlog = await this.findForOutput(new ObjectId(id))
+        const foundBlog = await blogsMongooseRepository.findForOutput(new ObjectId(id));
 
         return {
             status: ResultStatus.Success,

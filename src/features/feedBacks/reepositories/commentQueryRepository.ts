@@ -1,5 +1,5 @@
 import {HelperQueryTypeComment} from "../../../input-output-types/inputTypes";
-import {commentCollection} from "../../../db/mongo-db";
+import {commentCollection} from "../../../db/mongo/mongo-db";
 import {CommentViewModelType, PaginatorCommentsType} from "../../../input-output-types/comments/outputTypes";
 import {ObjectId} from "mongodb";
 import {CommentDBMongoType} from "../../../input-output-types/inputOutputTypesMongo";

@@ -1,5 +1,5 @@
 import {ObjectId, WithId} from "mongodb";
-import {deviceAuthSessions} from "../../../db/mongo-db";
+import {deviceAuthSessions} from "../../../db/mongo/mongo-db";
 import {DeviceAuthSessionsType, DeviceViewModelType} from "../../../input-output-types/common/common-types";
 
 export const securityQueryRepository = {

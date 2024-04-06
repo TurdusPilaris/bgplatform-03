@@ -5,7 +5,7 @@ import {ObjectId} from "mongodb";
 import {userQueryRepository} from "../features/users/repositories/userQueryRepository";
 import {authService} from "../features/auth/domain/auth-service";
 import {ResultStatus} from "../common/types/resultCode";
-import {customRateLimit} from "../db/mongo-db";
+import {customRateLimit} from "../db/mongo/mongo-db";
 import {CustomRateLimitType} from "../input-output-types/common/common-types";
 import {add} from "date-fns";
 
@@ -128,8 +128,6 @@ export const authMiddlewareRefreshToken = async (req:Request, res: Response, nex
         return;
     }
 
-    console.log("req.cookies.refreshToken", req.cookies.refreshToken)
-
     const result = await authService.checkRefreshToken(req.cookies.refreshToken)
 
     if(result.status === ResultStatus.Success){
@@ -181,12 +179,23 @@ export const commentInputValidator =
 
 export const apiRequestLimitMiddleware = async (req:Request, res: Response, next: NextFunction) => {
 
+    const currentDate = new Date();
+
+    const date = new Date(Date.now()-9000)
+
+    const apiInformation: CustomRateLimitType = {
+        _id: new ObjectId(),
+        IP: req.ip,
+        URL: req.originalUrl,
+        date: currentDate
+    }
+
+    await customRateLimit.insertOne(apiInformation);
+
     const filterCustomRate = {
         IP: req.ip,
-        URL: req.baseUrl,
-        date:{$gte: add(new Date(), {
-                seconds: -11
-            })}
+        URL: req.originalUrl,
+        date: {$gte: date}
     }
     const countCustomRate = await customRateLimit.countDocuments(filterCustomRate);
 
@@ -194,15 +203,6 @@ export const apiRequestLimitMiddleware = async (req:Request, res: Response, next
         res.sendStatus(429);
         return;
     }
-
-    const apiInformation: CustomRateLimitType = {
-        _id: new ObjectId(),
-        IP: req.ip,
-        URL: req.baseUrl,
-        date: new Date()
-    }
-
-    await customRateLimit.insertOne({_id: new ObjectId(), IP: req.ip, URL: req.baseUrl,date: new Date() });
 
     return next();
 

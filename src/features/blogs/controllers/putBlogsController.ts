@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
 import {blogsService} from "../domain/blogs-service"
-import {TypeBlogInputModel} from "../../../input-output-types/blogs/inputTypes";
-import {TypeBlogViewModel} from "../../../input-output-types/blogs/outputTypes";
+import {TypeBlogInputModel} from "../types/inputTypes";
+import {TypeBlogViewModel} from "../types/outputTypes";
 import {ParamsType} from "../../../input-output-types/inputTypes";
 import {ResultStatus} from "../../../common/types/resultCode";
 

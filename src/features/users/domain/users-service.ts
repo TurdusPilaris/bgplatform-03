@@ -2,7 +2,7 @@ import {
     UserAccountDBMongoType,
 
 } from "../../../input-output-types/inputOutputTypesMongo";
-import {userCollection} from "../../../db/mongo-db";
+import {userCollection} from "../../../db/mongo/mongo-db";
 import {ObjectId} from "mongodb";
 import {UserInputModelType} from "../../../input-output-types/users/inputTypes";
 import {userMongoRepository} from "../repositories/usersMongoRepositories";

@@ -1,6 +1,6 @@
 import {agent as supertest} from 'supertest';
 import {app} from "../src/main/app";
-import {blogCollection, db, postCollection} from "../src/db/mongo-db";
+import {blogCollection, db, postCollection} from "../src/db/mongo/mongo-db";
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {SETTING} from "../src/main/setting";
 import {testSeeder} from "./test.seeder";

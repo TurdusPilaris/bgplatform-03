@@ -2,7 +2,7 @@ import {
     PostDBMongoType, PostDBMongoTypeWithoutID,
 } from "../../../input-output-types/inputOutputTypesMongo";
 import {blogsMongoRepository} from "../../blogs/repositories/blogsMongoRepository";
-import {postCollection} from "../../../db/mongo-db";
+import {postCollection} from "../../../db/mongo/mongo-db";
 import {ObjectId} from "mongodb";
 import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTypes";
 import {TypePostViewModel} from "../../../input-output-types/posts/outputTypes";

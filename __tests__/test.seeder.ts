@@ -1,5 +1,5 @@
 import {
-    BlogDBMongoTypeWithoutID,
+    BlogDBMongoType,
     PostDBMongoTypeWithoutID,
     UserAccountDBMongoType
 } from "../src/input-output-types/inputOutputTypesMongo";
@@ -7,8 +7,8 @@ import {RegisterUserType} from "./types/typesTests";
 import {ObjectId} from "mongodb";
 import {v4 as uuidv4} from "uuid";
 import {add} from "date-fns";
-import {userCollection} from "../src/db/mongo-db";
-import {TypeBlogInputModel} from "../src/input-output-types/blogs/inputTypes";
+import {userCollection} from "../src/db/mongo/mongo-db";
+import {TypeBlogInputModel} from "../src/features/blogs/types/inputTypes";
 import {TypePostInputModelModel} from "../src/input-output-types/posts/inputTypes";
 
 export const testSeeder = {
@@ -19,7 +19,7 @@ export const testSeeder = {
             password: '1234567'
         }
     },
-    createBlog():BlogDBMongoTypeWithoutID {
+    createBlog(): BlogDBMongoType {
         return {
             name: "Test blog",
             description: "description for test",
@@ -28,15 +28,29 @@ export const testSeeder = {
             isMembership: false
         }
     },
-    createBlogInput(name?:string,
-                    description?:string, websiteUrl?:string):TypeBlogInputModel {
+
+    creatBlogDtos(count: number) {
+        const blogs = [];
+        for (let i = 0; i < count; i++) {
+            blogs.push({
+                name: "Test blog" + i,
+                description: "description for test" + i,
+                websiteUrl: "websiteUrl${i}@gmail.com",
+                createdAt: new Date().toISOString(),
+                isMembership: false
+            })
+        }
+        return blogs;
+    },
+    createBlogInput(name?: string,
+                    description?: string, websiteUrl?: string): TypeBlogInputModel {
         return {
             name: name || "Test blog",
             description: description || "description for test",
             websiteUrl: websiteUrl || "websiteUrl.com"
         }
     },
-    createPost(blogId:string, blogName: string):PostDBMongoTypeWithoutID {
+    createPost(blogId: string, blogName: string): PostDBMongoTypeWithoutID {
         return {
             title: "post test 1",
             shortDescription: "shortDescription test 1",
@@ -46,8 +60,8 @@ export const testSeeder = {
             createdAt: new Date().toISOString(),
         }
     },
-    createPostInputModel(blogId:string, title?:string,
-                         shortDescription?:string, content?:string):TypePostInputModelModel {
+    createPostInputModel(blogId: string, title?: string,
+                         shortDescription?: string, content?: string): TypePostInputModelModel {
         return {
             title: title || "post test 1 input",
             shortDescription: shortDescription || "shortDescription test 1",

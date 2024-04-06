@@ -1,7 +1,7 @@
 import {
     PostDBMongoType,
 } from "../../../input-output-types/inputOutputTypesMongo";
-import { postCollection} from "../../../db/mongo-db";
+import { postCollection} from "../../../db/mongo/mongo-db";
 import {ObjectId} from "mongodb";
 import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 import {HelperQueryTypePost} from "../../../input-output-types/inputTypes";

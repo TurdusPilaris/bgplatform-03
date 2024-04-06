@@ -1,5 +1,5 @@
 import {InsertedInfoType, PostDBMongoTypeWithoutID} from "../../../input-output-types/inputOutputTypesMongo";
-import {deviceAuthSessions, postCollection} from "../../../db/mongo-db";
+import {deviceAuthSessions, postCollection} from "../../../db/mongo/mongo-db";
 import {DeviceAuthSessionsType} from "../../../input-output-types/common/common-types";
 import {ObjectId} from "mongodb";
 

@@ -1,7 +1,7 @@
 import { Request, Response} from "express";
 import {ObjectId} from "mongodb";
 import {blogsService} from "../domain/blogs-service"
-import {TypeBlogViewModel} from "../../../input-output-types/blogs/outputTypes";
+import {TypeBlogViewModel} from "../types/outputTypes";
 
 export const getBlogsControllerByID = async( req: Request<any, any, any, any>, res: Response<TypeBlogViewModel>) => {
 

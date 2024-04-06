@@ -1,6 +1,6 @@
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {SETTING} from "../src/main/setting";
-import {db} from "../src/db/mongo-db";
+import {db} from "../src/db/mongo/mongo-db";
 import {authService} from "../src/features/auth/domain/auth-service";
 import {businessService} from "../src/common/domain/business-service";
 import {emailServiceMock} from "./mock";

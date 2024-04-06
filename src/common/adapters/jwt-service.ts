@@ -6,7 +6,6 @@ export const jwtService = {
 
     async createToken(payload:PayloadTokenType, expiresTime: string, SECRET_CODE: string) {
 
-        console.log("payload",payload)
         return jwt.sign(
             payload,
             // {userId: userId},

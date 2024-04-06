@@ -1,22 +1,30 @@
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {
     BlogDBMongoType,
 } from "../../../input-output-types/inputOutputTypesMongo";
-import {blogCollection, postCollection} from "../../../db/mongo-db";
+import {blogCollection, postCollection} from "../../../db/mongo/mongo-db";
 import {blogsMongoRepository} from "./blogsMongoRepository";
 import {postsMongoRepository} from "../../posts/repositories/postMongoRepository";
-import {PaginatorBlogType, TypeBlogViewModel} from "../../../input-output-types/blogs/outputTypes";
+import {PaginatorBlogType, TypeBlogViewModel} from "../types/outputTypes";
 import {PaginatorPostType} from "../../../input-output-types/posts/outputTypes";
 import {HelperQueryTypeBlog, HelperQueryTypePost} from "../../../input-output-types/inputTypes";
+import {blogsMongooseRepository} from "./blogsMongooseRepository";
 
 export const blogQueryRepository = {
 
-    findForOutput: async function (id: ObjectId) {
+    findForOutputOld: async function (id: ObjectId) {
         const foundBlog = await blogsMongoRepository.find(id);
         if (!foundBlog) {
             return undefined
         }
-        return this.mapToOutput(foundBlog as BlogDBMongoType);
+        return this.mapToOutput(foundBlog as WithId<BlogDBMongoType>);
+    },
+    findForOutput: async function (id: ObjectId) {
+        const foundBlog = await blogsMongooseRepository.findById(id);
+        if (!foundBlog) {
+            return undefined
+        }
+        return this.mapToOutput(foundBlog as WithId<BlogDBMongoType>);
     },
     async getMany(query:HelperQueryTypePost, blogId: string)  {
 
@@ -47,7 +55,7 @@ export const blogQueryRepository = {
         return paginatorPost;
     },
 
-    mapToOutput(blog: BlogDBMongoType): TypeBlogViewModel {
+    mapToOutput(blog: WithId<BlogDBMongoType>): TypeBlogViewModel {
         return {
             id: blog._id.toString(),
             name: blog.name,

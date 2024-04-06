@@ -1,4 +1,4 @@
-import {TypePostViewModel} from "../posts/outputTypes";
+import {TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 
 export type TypeBlogViewModel = {
     id: string;

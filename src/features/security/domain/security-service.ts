@@ -4,7 +4,6 @@ import {ResultObject} from "../../../common/types/result.types";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {ObjectId} from "mongodb";
 import {securityQueryRepository} from "../repository/securityQueryRepository";
-import {deviceAuthSessions} from "../../../db/mongo-db";
 
 export const securityService = {
 

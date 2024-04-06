@@ -1,6 +1,6 @@
 import { Request, Response} from "express";
 import {InsertedInfoType,} from "../../../input-output-types/inputOutputTypesMongo";
-import {TypeBlogInputModel} from "../../../input-output-types/blogs/inputTypes";
+import {TypeBlogInputModel} from "../../blogs/types/inputTypes";
 import {postsService} from "../domain/posts-service";
 
 export const postForPostsController = async (req: Request<TypeBlogInputModel>, res: Response) => {

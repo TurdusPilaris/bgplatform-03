@@ -1,6 +1,6 @@
 import {agent as supertest} from 'supertest';
 import {app} from "../src/main/app";
-import {blogCollection, db} from "../src/db/mongo-db";
+import {blogCollection, db} from "../src/db/mongo/mongo-db";
 import {MongoMemoryServer} from "mongodb-memory-server";
 
 import {SETTING} from "../src/main/setting";
@@ -44,11 +44,8 @@ describe('/blogs', () => {
 
     it('Post blogs 401 status []', async () => {
 
-        const bodyPostBlog = {
-            "name": "e2e test",
-            "description": "bla bla bla",
-            "websiteUrl": "https://e2etest.com"
-        }
+        const bodyPostBlog = testSeeder.createBlog();
+
         const res = await req
             .post(SETTING.PATH_BLOGS)
             .send(bodyPostBlog)
@@ -59,29 +56,21 @@ describe('/blogs', () => {
 
     it('Post blogs 200 status []', async () => {
 
-        const bodyPostBlog = {
-            "name": "e2e test",
-            "description": "bla bla bla",
-            "websiteUrl": "https://e2etest.com"
-        }
+        const bodyPostBlog = testSeeder.createBlog();
         const res = await req
             .post(SETTING.PATH_BLOGS)
             .send(bodyPostBlog)
             .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
             .expect(201);
 
-        expect(res.body.name).toBe("e2e test");
-        expect(res.body.description).toBe("bla bla bla");
-        expect(res.body.websiteUrl).toBe("https://e2etest.com");
+        expect(res.body.name).toBe(bodyPostBlog.name);
+        expect(res.body.description).toBe(bodyPostBlog.description);
+        expect(res.body.websiteUrl).toBe(bodyPostBlog.websiteUrl);
     })
 
     it('Get blogs by id 200 status []', async () => {
 
-        const bodyPostBlog = {
-            "name": "e2e test",
-            "description": "bla bla bla",
-            "websiteUrl": "https://e2etest.com"
-        }
+        const bodyPostBlog = testSeeder.createBlog();
         const resPost = await req
             .post(SETTING.PATH_BLOGS)
             .send(bodyPostBlog)
@@ -91,9 +80,9 @@ describe('/blogs', () => {
             .get(SETTING.PATH_BLOGS + "/" + resPost.body.id)
             .expect(200)
 
-        expect(res.body.name).toBe("e2e test");
-        expect(res.body.description).toBe("bla bla bla");
-        expect(res.body.websiteUrl).toBe("https://e2etest.com");
+        expect(res.body.name).toBe(bodyPostBlog.name);
+        expect(res.body.description).toBe(bodyPostBlog.description);
+        expect(res.body.websiteUrl).toBe(bodyPostBlog.websiteUrl);
         expect(res.body.id).toBe(resPost.body.id);
         expect(res.body.isMembership).toBe(false);
     })

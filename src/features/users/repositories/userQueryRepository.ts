@@ -1,7 +1,7 @@
 import {
     UserAccountDBMongoType,
 } from "../../../input-output-types/inputOutputTypesMongo";
-import {userCollection} from "../../../db/mongo-db";
+import {userCollection} from "../../../db/mongo/mongo-db";
 import {ObjectId} from "mongodb";
 import {UserQueryType} from "../../../input-output-types/inputTypes";
 import {userMongoRepository} from "./usersMongoRepositories";
@@ -64,7 +64,6 @@ export const userQueryRepository ={
     },
     getCountDocumentWithFilter: async function (login:string|undefined, email: string|undefined) {
 
-        console.log("login filter------ " + JSON.stringify(this.loginOrEmailFilter(login, email)))
         return await userCollection.countDocuments(this.loginOrEmailFilter(login, email));
 
     },
