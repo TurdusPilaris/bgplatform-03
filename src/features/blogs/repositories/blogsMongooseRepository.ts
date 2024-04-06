@@ -6,6 +6,7 @@ import {blogCollection} from "../../../db/mongo/mongo-db";
 import {TypeBlogViewModel} from "../types/outputTypes";
 
 export const blogsMongooseRepository = {
+
     async findById(id: ObjectId): Promise<BlogDocument| null> {
         return BlogModel.findOne({_id: id})
     },
@@ -23,22 +24,8 @@ export const blogsMongooseRepository = {
         await blog.save();
 
     },
-    findForOutput: async function (id: ObjectId) {
-        const foundBlog = await this.findById(id);
-        if (!foundBlog) {
-            return null
-        }
-        return this.mapToOutput(foundBlog as WithId<BlogDBMongoType>);
-    },
-
-    mapToOutput(blog: WithId<BlogDBMongoType>): TypeBlogViewModel {
-        return {
-            id: blog._id.toString(),
-            name: blog.name,
-            description: blog.description,
-            websiteUrl: blog.websiteUrl,
-            createdAt: blog.createdAt,
-            isMembership: false
-        }
+    async deleteBlog(id: ObjectId): Promise<boolean> {
+        const res = await BlogModel.deleteOne({_id: id})
+        return res.deletedCount === 1
     },
 }

@@ -2,6 +2,7 @@ import { Request, Response} from "express";
 import {HelperQueryTypePost} from "../../../input-output-types/inputTypes";
 import {postQueryRepository} from "../repositories/postQueryRepository";
 import {PaginatorPostType} from "../../../input-output-types/posts/outputTypes";
+import {postsService} from "../domain/posts-service";
 
 export const getPostsController = async (req: Request<any, any, any, any>, res: Response<PaginatorPostType>) => {
 
@@ -16,8 +17,10 @@ export const getPostsController = async (req: Request<any, any, any, any>, res: 
         return queryHelper;
     }
 
+    const result = await postsService.getAllPosts(helper(req.query))
+
     res
         .status(200)
-        .send(await postQueryRepository.getAllPosts(helper(req.query)));
+        .send(result.data);
 
 }

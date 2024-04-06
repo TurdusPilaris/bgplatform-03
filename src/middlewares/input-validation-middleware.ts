@@ -8,6 +8,7 @@ import {ResultStatus} from "../common/types/resultCode";
 import {customRateLimit} from "../db/mongo/mongo-db";
 import {CustomRateLimitType} from "../input-output-types/common/common-types";
 import {add} from "date-fns";
+import {blogsMongooseRepository} from "../features/blogs/repositories/blogsMongooseRepository";
 
 export const inputValidationMiddleware = (req:Request, res: Response, next: NextFunction): any => {
 
@@ -66,7 +67,7 @@ export const postInputValidatorPost =
                 throw new Error('Blog ID is not valid')
             }
             if(value) {
-            const foundBlog = await blogsMongoRepository.find(new ObjectId(value))
+            const foundBlog = await blogsMongooseRepository.findById(new ObjectId(value))
             if(!foundBlog) {
                 throw new Error('Blog not found')
             }}

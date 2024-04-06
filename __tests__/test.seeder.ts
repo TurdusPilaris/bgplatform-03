@@ -10,6 +10,7 @@ import {add} from "date-fns";
 import {userCollection} from "../src/db/mongo/mongo-db";
 import {TypeBlogInputModel} from "../src/features/blogs/types/inputTypes";
 import {TypePostInputModelModel} from "../src/input-output-types/posts/inputTypes";
+import {SETTING} from "../src/main/setting";
 
 export const testSeeder = {
     createUserDTO() {
@@ -146,7 +147,6 @@ export const testSeeder = {
         };
 
         const res = await userCollection.insertOne({...newUser})
-
 
         return {
             ...newUser

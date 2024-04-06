@@ -2,7 +2,7 @@ import {agent as supertest} from 'supertest';
 import {app} from "../src/main/app";
 import {blogCollection, db} from "../src/db/mongo/mongo-db";
 import {MongoMemoryServer} from "mongodb-memory-server";
-
+import mongoose from 'mongoose'
 import {SETTING} from "../src/main/setting";
 import {testSeeder} from "./test.seeder";
 import {createUser} from "./createUser";
@@ -32,21 +32,50 @@ describe('/blogs', () => {
         await db.stop()
     })
 
-    it('GET blogs 200 status []', async () => {
+    it('GET blogs 200 status pagination 1 []', async () => {
 
-        const blogs = testSeeder.creatBlogDtos(5);
+        const blogs = testSeeder.creatBlogDtos(13);
 
-        for(let i = 0; i++; i++ ){
+        for(let i = 0; i<blogs.length; i++ ){
             await req
                 .post(SETTING.PATH_BLOGS)
                 .send(blogs[i])
                 .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+                .expect(201)
         }
         const res = await req
-            .get(SETTING.PATH_BLOGS)
+            .get(SETTING.PATH_BLOGS+"?pageNumber=1&pageSize=11&sortBy=createdAt&sortDirection=asc&searchNameTerm=blog")
             .expect(200);
 
-        expect(res.body.items.length).toBe(blogs.length);
+        expect(res.body.items.length).toBe(11);
+        expect(res.body.totalCount).toBe(blogs.length);
+        expect(res.body.pagesCount).toBe(2);
+        expect(res.body.page).toBe(1);
+        expect(res.body.items[0].name).toBe(blogs[0].name)
+
+    })
+
+    it('GET blogs 200 status pagination 2 []', async () => {
+
+        const blogs = testSeeder.creatBlogDtos(13);
+
+        for(let i = 0; i<blogs.length; i++ ){
+            await req
+                .post(SETTING.PATH_BLOGS)
+                .send(blogs[i])
+                .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+                .expect(201)
+        }
+        const res = await req
+            .get(SETTING.PATH_BLOGS+"?pageNumber=1&pageSize=5&sortBy=createdAt&sortDirection=desc&searchNameTerm=blog")
+            // .get(SETTING.PATH_BLOGS)
+            .expect(200);
+
+        expect(res.body.items.length).toBe(5);
+        expect(res.body.totalCount).toBe(blogs.length);
+        expect(res.body.pagesCount).toBe(3);
+        expect(res.body.page).toBe(1);
+        expect(res.body.items[0].name).toBe(blogs[12].name)
     })
 
     it('Post blogs 401 status []', async () => {
@@ -255,7 +284,7 @@ describe('/blogs', () => {
         const newBlogSeederUpdate = testSeeder.createBlogInput("Blog test upd",
             "Description".repeat(1));
 
-        const res = await req
+         await req
             .put(SETTING.PATH_BLOGS + '/' + resBlog.body.id)
             .set({authorization: UNCORRECT_ADMIN_AUTH_BASE64})
             .send(newBlogSeederUpdate)

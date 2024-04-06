@@ -10,20 +10,14 @@ import {PaginatorPostType} from "../../../input-output-types/posts/outputTypes";
 import {HelperQueryTypeBlog, HelperQueryTypePost} from "../../../input-output-types/inputTypes";
 import {blogsMongooseRepository} from "./blogsMongooseRepository";
 import {BlogModel} from "../../../db/mongo/blog/blog.model";
+import {postQueryRepository} from "../../posts/repositories/postQueryRepository";
 
 export const blogQueryRepository = {
 
-    findForOutputOld: async function (id: ObjectId) {
-        const foundBlog = await blogsMongoRepository.find(id);
-        if (!foundBlog) {
-            return undefined
-        }
-        return this.mapToOutput(foundBlog as WithId<BlogDBMongoType>);
-    },
     findForOutput: async function (id: ObjectId) {
         const foundBlog = await blogsMongooseRepository.findById(id);
         if (!foundBlog) {
-            return undefined
+            return null
         }
         return this.mapToOutput(foundBlog as WithId<BlogDBMongoType>);
     },
@@ -43,7 +37,7 @@ export const blogQueryRepository = {
             .limit(query.pageSize)
             .toArray();
 
-        const itemsForPaginator = items.map(postsMongoRepository.mapToOutput);
+        const itemsForPaginator = items.map(postQueryRepository.mapToOutput);
         const countPosts = await postCollection.countDocuments({...byID,});
         const paginatorPost: PaginatorPostType =
          {

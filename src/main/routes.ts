@@ -7,10 +7,7 @@ import {usersRouter} from "../features/users";
 import {authRouter} from "../features/auth/auth-router";
 import {SETTING} from "./setting";
 import {feedbackRouter} from "../features/feedBacks/feedbackRouter";
-import {apiRequestLimitMiddleware} from "../middlewares/input-validation-middleware";
 import {securityRouter} from "../features/security";
-
-
 
 export const addRoutes = (app: Express) => {
     app.use(SETTING.PATH_TESTING, testingRouter);
