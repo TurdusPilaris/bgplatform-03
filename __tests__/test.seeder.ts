@@ -35,7 +35,7 @@ export const testSeeder = {
             blogs.push({
                 name: "Test blog" + i,
                 description: "description for test" + i,
-                websiteUrl: "websiteUrl${i}@gmail.com",
+                websiteUrl: `websiteUrl${i}@gmail.com`,
                 createdAt: new Date().toISOString(),
                 isMembership: false
             })

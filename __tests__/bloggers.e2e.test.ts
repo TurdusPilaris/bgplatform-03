@@ -34,12 +34,19 @@ describe('/blogs', () => {
 
     it('GET blogs 200 status []', async () => {
 
+        const blogs = testSeeder.creatBlogDtos(5);
+
+        for(let i = 0; i++; i++ ){
+            await req
+                .post(SETTING.PATH_BLOGS)
+                .send(blogs[i])
+                .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+        }
         const res = await req
             .get(SETTING.PATH_BLOGS)
             .expect(200);
 
-        const allBlogs = await blogCollection.find().toArray();
-        expect(res.body.items.length).toBe(allBlogs.length);
+        expect(res.body.items.length).toBe(blogs.length);
     })
 
     it('Post blogs 401 status []', async () => {
@@ -98,11 +105,7 @@ describe('/blogs', () => {
 
     it('DELETE blogs 401 not auth Unauthorized= []', async () => {
 
-        const bodyPostBlog = {
-            "name": "e2e test",
-            "description": "bla bla bla",
-            "websiteUrl": "https://e2etest.com"
-        }
+        const bodyPostBlog = testSeeder.createBlog();
         const resPost = await req
             .post(SETTING.PATH_BLOGS)
             .send(bodyPostBlog)
@@ -117,11 +120,7 @@ describe('/blogs', () => {
 
     it('DELETE blogs success 204 []', async () => {
 
-        const bodyPostBlog = {
-            "name": "e2e test",
-            "description": "bla bla bla",
-            "websiteUrl": "https://e2etest.com"
-        }
+        const bodyPostBlog = testSeeder.createBlog();
         const resPost = await req
             .post(SETTING.PATH_BLOGS)
             .send(bodyPostBlog)
