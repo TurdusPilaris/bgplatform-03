@@ -1,6 +1,5 @@
 import {
-    BlogDBMongoType,
-    PostDBMongoTypeWithoutID,
+    BlogDBMongoType, PostDBMongoType,
     UserAccountDBMongoType
 } from "../src/input-output-types/inputOutputTypesMongo";
 import {RegisterUserType} from "./types/typesTests";
@@ -51,7 +50,7 @@ export const testSeeder = {
             websiteUrl: websiteUrl || "websiteUrl.com"
         }
     },
-    createPost(blogId: string, blogName: string): PostDBMongoTypeWithoutID {
+    createPost(blogId: string, blogName: string): PostDBMongoType {
         return {
             title: "post test 1",
             shortDescription: "shortDescription test 1",
@@ -60,6 +59,20 @@ export const testSeeder = {
             blogName: blogName,
             createdAt: new Date().toISOString(),
         }
+    },
+    creatPostDtos(blogId: string, blogName: string, count: number) {
+        const posts = [];
+        for (let i = 0; i < count; i++) {
+            posts.push({
+                title: "Test post" + i,
+                shortDescription: "shortDescription for test" + i,
+                content: "input.content test " + i,
+                blogId: blogId,
+                blogName: blogName,
+                createdAt: new Date().toISOString(),
+            })
+        }
+        return posts;
     },
     createPostInputModel(blogId: string, title?: string,
                          shortDescription?: string, content?: string): TypePostInputModelModel {

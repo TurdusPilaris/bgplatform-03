@@ -12,6 +12,7 @@ import {jwtService} from "../../../common/adapters/jwt-service";
 import {SETTING} from "../../../main/setting";
 import {blackListCollection, deviceAuthSessions, userCollection} from "../../../db/mongo/mongo-db";
 import {DeviceAuthSessionsType, PayloadTokenType} from "../../../input-output-types/common/common-types";
+import {NewPasswordRecoveryInputModel} from "../../../input-output-types/auth/inputTypes";
 
 export const authService = {
 
@@ -91,6 +92,43 @@ export const authService = {
             data: null
         }
     },
+    async confirmEmailAndUpdatePassword(input: NewPasswordRecoveryInputModel): Promise<ResultObject> {
+
+        const foundedUser = await userQueryRepository.findByCodeConfirmation(input.recoveryCode);
+
+        if (!foundedUser) return {
+            status: ResultStatus.BadRequest,
+            errorField: 'code',
+            errorMessage: 'Not found user',
+            data: null
+        }
+        if (foundedUser.emailConfirmation.isConfirmed) return {
+            status: ResultStatus.BadRequest,
+            errorField: 'code',
+            errorMessage: 'Code confirmation already been applied',
+            data: null
+        }
+        if (foundedUser.emailConfirmation.expirationDate < new Date()) {
+            return {
+                status: ResultStatus.BadRequest,
+                errorField: 'code',
+                errorMessage: 'Code confirmation is expired',
+                data: null
+            }
+        }
+
+        await userMongoRepository.updateConfirmation(foundedUser._id);
+
+        const passwordHash = await bcryptService.generationHash(input.newPassword);
+
+        await userMongoRepository.updatePasswordHash(foundedUser._id,passwordHash);
+
+        return {
+            status: ResultStatus.Success,
+            errorMessage: 'Code confirmation is expired',
+            data: null
+        }
+    },
     async resendingEmail(email: string): Promise<ResultObject> {
 
         const user = await userQueryRepository.findByLoginOrEmail(email);
@@ -110,6 +148,34 @@ export const authService = {
 
         try {
             businessService.sendRegisrtationEmail(email, newConfirmationCode);
+        } catch (e: unknown) {
+            console.error('Send email error', e);
+        }
+
+        return {
+            status: ResultStatus.Success,
+            data: null
+        }
+    },
+    async recoveryPasswordSendCode(email: string): Promise<ResultObject> {
+
+        const user = await userQueryRepository.findByLoginOrEmail(email);
+
+        if (user.emailConfirmation.isConfirmed) return {
+            status: ResultStatus.BadRequest,
+            errorField: 'email',
+            errorMessage: 'Code confirmation already been applied',
+            data: null
+        }
+
+        const newConfirmationCode = uuidv4();
+        await userMongoRepository.updateConfirmationCode(user._id, newConfirmationCode, add(new Date(), {
+            hours: 1,
+            minutes: 3
+        }))
+
+        try {
+            businessService.sendRecoveryPassword(email, newConfirmationCode);
         } catch (e: unknown) {
             console.error('Send email error', e);
         }
@@ -215,24 +281,6 @@ export const authService = {
         }
 
     },
-    async getRefreshTokenBlackList(refreshToken: string, userId: ObjectId): Promise<BlackListDBMongoType | null> {
-
-        return await blackListCollection.findOne({userId: userId.toString(), refreshToken: refreshToken});
-
-    },
-    async updateBlackList(refreshToken: string, userId: ObjectId) {
-
-        try {
-            await blackListCollection.insertOne({
-                _id: new ObjectId(),
-                refreshToken: refreshToken,
-                userId: userId.toString()
-            });
-        } catch (e) {
-
-        }
-
-    },
 
     async updateToken(refreshToken: string){
 
@@ -246,15 +294,9 @@ export const authService = {
         const newPayloadRefreshToken = await jwtService.decodeToken(newRefreshToken);
 
         try {
-            console.log("session!._id", session!._id)
-            console.log("дата iat", new Date(newPayloadRefreshToken.iat*1000))
-            console.log("дата exp", new Date(newPayloadRefreshToken.exp*1000))
             await this.updateSession(session!._id, new Date(newPayloadRefreshToken.iat*1000), new Date(newPayloadRefreshToken.exp*1000));
         } catch (e) {
-            console.log("session!._id", session!._id)
-            console.log("дата iat", new Date(newPayloadRefreshToken.iat*1000))
-            console.log("дата exp", new Date(newPayloadRefreshToken.exp*1000))
-            console.log("this error", e)
+             console.log("this error", e)
         }
 
 

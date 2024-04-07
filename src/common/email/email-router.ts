@@ -13,5 +13,16 @@ export const emailRouter = {
             html: textMessage
         }
 
+    },
+    getDataMailForRecoveryPassword(email:string, confirmationCode: string):DataMailType{
+
+        const textMessage =  `<h1>Password recovery</h1><p>To finish password recovery please follow the link below:<a href='https://somesite.com/confirm-email?code=${confirmationCode}'>recovery password</a></p>`
+        return {
+            from: '"Blogger platform"',
+            to: email,
+            subject: registrationEmail,
+            html: textMessage
+        }
+
     }
 }

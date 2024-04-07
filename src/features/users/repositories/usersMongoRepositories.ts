@@ -40,11 +40,19 @@ export const userMongoRepository = {
     }
     ,
     async  updateConfirmationCode(_id: ObjectId, confirmationCode: string, expirationDate: Date) {
-       await userCollection.updateOne({_id: _id}, {
+        await userCollection.updateOne({_id: _id}, {
             $set: {
                 "emailConfirmation.confirmationCode": confirmationCode,
                 "emailConfirmation.expirationDate": expirationDate,
                 "emailConfirmation.isConfirmed": false,
+            }
+        })
+    }
+    ,
+    async  updatePasswordHash(_id: ObjectId, passwordHash: string) {
+        await userCollection.updateOne({_id: _id}, {
+            $set: {
+                "accountData.passwordHash": passwordHash
             }
         })
     }

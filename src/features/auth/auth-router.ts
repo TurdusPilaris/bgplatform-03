@@ -12,6 +12,8 @@ import {getInformationMe} from "./controllers/getInformationMeController";
 import {postRegistrationEmailResendingController} from "./controllers/postRegistrationEmailResendingController";
 import {postRefreshTokenController} from "./controllers/postRefreshTokenController";
 import {postLogOutControllers} from "./controllers/postLogOutController";
+import {postPasswordRecoveryController} from "./controllers/postPasswordRecoveryController";
+import {postNewPasswordController} from "./controllers/postNewPasswordController";
 
 export const authRouter = Router({})
 
@@ -22,4 +24,6 @@ authRouter.post('/registration-email-resending', apiRequestLimitMiddleware, emai
 authRouter.get('/me', authMiddlewareBearer, getInformationMe)
 authRouter.post('/refresh-token', authMiddlewareRefreshToken, postRefreshTokenController)
 authRouter.post('/logout', authMiddlewareRefreshToken, postLogOutControllers)
+authRouter.post('/new-password', apiRequestLimitMiddleware, postNewPasswordController)
+authRouter.post('/password-recovery', apiRequestLimitMiddleware, postPasswordRecoveryController )
 

@@ -1,11 +1,11 @@
 import {Request, Response} from "express";
 import {authService} from "../domain/auth-service";
+import {NewPasswordRecoveryInputModel} from "../../../input-output-types/auth/inputTypes";
 import {ResultStatus} from "../../../common/types/resultCode";
-import {RegisrtationConfirmationCodeModelType} from "../../../input-output-types/auth/inputTypes";
 
-export const postRegisrtationConfirmationController = async (req: Request<RegisrtationConfirmationCodeModelType>, res: Response) => {
+export const postNewPasswordController = async (req: Request<any,NewPasswordRecoveryInputModel>, res:Response) =>{
 
-    const resultObject = await authService.confirmEmail(req.body.code);
+    const resultObject =  await authService.confirmEmailAndUpdatePassword(req.body);
 
     if (resultObject.status === ResultStatus.BadRequest) {
         res.status(400).send({errorsMessages: [{message: resultObject.errorMessage, field: resultObject.errorField}]});
@@ -14,5 +14,4 @@ export const postRegisrtationConfirmationController = async (req: Request<Regisr
         res.sendStatus(204);
         return;
     }
-
 }

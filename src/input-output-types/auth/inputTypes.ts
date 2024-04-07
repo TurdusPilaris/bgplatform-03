@@ -6,3 +6,8 @@ export type LoginInputType = {
 export type RegisrtationConfirmationCodeModelType = {
     code: string;
 }
+
+export type NewPasswordRecoveryInputModel = {
+    newPassword: string;
+    recoveryCode: string;
+}

@@ -10,5 +10,10 @@ export const businessService = {
 
        const dataMail = emailRouter.getDataMailForRegisrtation(email, confirmationCode)
        await emailAdapter.sandMail(dataMail);
-   }
+   },
+    async sendRecoveryPassword(email: string, confirmationCode: string){
+
+        const dataMail = emailRouter.getDataMailForRecoveryPassword(email, confirmationCode)
+        await emailAdapter.sandMail(dataMail);
+    }
 }
