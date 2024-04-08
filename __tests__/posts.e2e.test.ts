@@ -323,43 +323,127 @@ describe('/posts', () => {
 
     })
 
-    it('GET posts for blogID endpoint = /blogs/:blogId/posts ', async () => {
+    it('Post posts for blogID endpoint = /blogs/:blogId/posts OK 201', async () => {
 
-        // const newBlog = {
-        //     name: "name for test",
-        //     description: "description for test",
-        //     websiteUrl: "websiteUrl.com",
-        //     createdAt: new Date().toISOString(),
-        //     isMembership: false
-        // }
-        //
-        // const info = await blogCollection.insertOne(newBlog);
-        //
-        // const newPost= {
-        //     title: "post test 1",
-        //     shortDescription: "shortDescription test 1",
-        //     content: "input.content test 1",
-        //     blogId: info.insertedId.toString(),
-        //     blogName: newBlog.name,
-        //     createdAt: new Date().toISOString(),
-        // }
-        //
-        // const newPost2= {
-        //     title: "post test 2",
-        //     shortDescription: "shortDescription test 2",
-        //     content: "input.content test 2",
-        //     blogId: info.insertedId.toString(),
-        //     blogName: newBlog.name,
-        //     createdAt: new Date().toISOString(),
-        // }
-        //
-        //  await postCollection.insertOne(newPost);
-        //  await postCollection.insertOne(newPost2);
-        //
-        // const res = await req
-        //     .get(`/blogs/${info.insertedId.toString()}/posts?pageNumber=1&pageSize=10&sortBy=createdAt&sortDirection=asc&searchNameTerm=2`)
-        //     .expect(200);
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
 
+        const dtoPost =  testSeeder.createPostInputModelWithoutID();
+
+        const res = await req
+            .post(`/blogs/${resBlog.body.id}/posts`)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(dtoPost)
+            .expect(201);
+
+        expect(res.body.title).toBe(dtoPost.title);
+        expect(res.body.shortDescription).toBe(dtoPost.shortDescription);
+        expect(res.body.content).toBe(dtoPost.content);
+        expect(res.body.blogId).toBe(resBlog.body.id);
+        expect(res.body.blogName).toBe(resBlog.body.name);
+
+    })
+
+    it('Post posts for blogID endpoint = /blogs/:blogId/posts 401 Unauth', async () => {
+
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const dtoPost =  testSeeder.createPostInputModelWithoutID();
+
+        const res = await req
+            .post(`/blogs/${resBlog.body.id}/posts`)
+            .set({authorization: UNCORRECT_ADMIN_AUTH_BASE64})
+            .send(dtoPost)
+            .expect(401);
+
+    })
+
+    it('Post posts for blogID endpoint = /blogs/:blogId/posts invalid title 400', async () => {
+
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const dtoPost =  testSeeder.createPostInputModelWithoutID("title".repeat(10));
+
+        const res = await req
+            .post(`/blogs/${resBlog.body.id}/posts`)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(dtoPost)
+            .expect(400);
+
+        expect(res.body.errorsMessages[0].field).toBe('title');
+
+    })
+
+    it('Post posts for blogID endpoint = /blogs/:blogId/posts invalid short description 400', async () => {
+
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const dtoPost =  testSeeder.createPostInputModelWithoutID("title".repeat(2), "short".repeat(25));
+
+        const res = await req
+            .post(`/blogs/${resBlog.body.id}/posts`)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(dtoPost)
+            .expect(400);
+
+        expect(res.body.errorsMessages[0].field).toBe('shortDescription');
+
+    })
+
+    it('Post posts for blogID endpoint = /blogs/:blogId/posts invalid content 400', async () => {
+
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const dtoPost =  testSeeder.createPostInputModelWithoutID("title".repeat(2), "short".repeat(2), "contentdss".repeat(101));
+
+        const res = await req
+            .post(`/blogs/${resBlog.body.id}/posts`)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(dtoPost)
+            .expect(400);
+
+        expect(res.body.errorsMessages[0].field).toBe('content');
+
+    })
+
+    it('Post posts for blogID endpoint = /blogs/:blogId/posts blog not found 404', async () => {
+
+        const uncorrectedId = '232323232323232311111111'
+
+        const dtoPost =  testSeeder.createPostInputModelWithoutID();
+
+        const res = await req
+            .post(`/blogs/${uncorrectedId}/posts`)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(dtoPost)
+            .expect(404);
+
+    })
+
+    it('GET posts for blogID endpoint = /blogs/:blogId/posts OK 200', async () => {
+
+
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const dtoPost =  testSeeder.createPostInputModelWithoutID();
+
+        const resPost1 = await req
+            .post(`/blogs/${resBlog.body.id}/posts`)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(dtoPost)
+
+        const dtoPost2 =  testSeeder.createPostInputModelWithoutID("title 2", "short description 2", "content 2");
+
+        const resPost2 = await req
+            .post(`/blogs/${resBlog.body.id}/posts`)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(dtoPost2)
+
+        const res = await req
+            .get(`/blogs/${resBlog.body.id}/posts?pageNumber=1&pageSize=10&sortBy=createdAt&sortDirection=asc`)
+            .expect(200);
+
+        expect(res.body.items[0].title).toBe(resPost1.body.title)
+        console.log(res.body)
 
     })
 })

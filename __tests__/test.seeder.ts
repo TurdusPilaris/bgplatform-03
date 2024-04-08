@@ -83,6 +83,14 @@ export const testSeeder = {
             blogId: blogId
         }
     },
+    createPostInputModelWithoutID( title?: string,
+                         shortDescription?: string, content?: string) {
+        return {
+            title: title || "post test 1 input",
+            shortDescription: shortDescription || "shortDescription test 1",
+            content: content || "input.content test 1"
+        }
+    },
     createUserMongoDTO(): UserAccountDBMongoType {
         return {
             _id: new ObjectId(),
