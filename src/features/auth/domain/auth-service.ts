@@ -1,5 +1,5 @@
 import {bcryptService} from "../../../common/adapters/bcrypt-service";
-import {BlackListDBMongoType, UserAccountDBMongoType} from "../../../input-output-types/inputOutputTypesMongo";
+import {UserAccountDBMongoType} from "../../../input-output-types/inputOutputTypesMongo";
 import {userMongoRepository} from "../../users/repositories/usersMongoRepositories";
 import {ObjectId} from "mongodb";
 import {v4 as uuidv4} from 'uuid';
@@ -10,8 +10,8 @@ import {ResultStatus} from "../../../common/types/resultCode";
 import {businessService} from "../../../common/domain/business-service";
 import {jwtService} from "../../../common/adapters/jwt-service";
 import {SETTING} from "../../../main/setting";
-import {blackListCollection, deviceAuthSessions, userCollection} from "../../../db/mongo/mongo-db";
-import {DeviceAuthSessionsType, PayloadTokenType} from "../../../input-output-types/common/common-types";
+import { deviceAuthSessions} from "../../../db/mongo/mongo-db";
+import { PayloadTokenType} from "../../../input-output-types/common/common-types";
 import {NewPasswordRecoveryInputModel} from "../../../input-output-types/auth/inputTypes";
 
 export const authService = {
@@ -98,20 +98,20 @@ export const authService = {
 
         if (!foundedUser) return {
             status: ResultStatus.BadRequest,
-            errorField: 'code',
+            errorField: 'recoveryCode',
             errorMessage: 'Not found user',
             data: null
         }
         if (foundedUser.emailConfirmation.isConfirmed) return {
             status: ResultStatus.BadRequest,
-            errorField: 'code',
+            errorField: 'recoveryCode',
             errorMessage: 'Code confirmation already been applied',
             data: null
         }
         if (foundedUser.emailConfirmation.expirationDate < new Date()) {
             return {
                 status: ResultStatus.BadRequest,
-                errorField: 'code',
+                errorField: 'recoveryCode',
                 errorMessage: 'Code confirmation is expired',
                 data: null
             }
@@ -133,6 +133,12 @@ export const authService = {
 
         const user = await userQueryRepository.findByLoginOrEmail(email);
 
+        if (!user) return {
+            status: ResultStatus.BadRequest,
+            errorField: 'email',
+            errorMessage: 'User not founded by email',
+            data: null
+        }
         if (user.emailConfirmation.isConfirmed) return {
             status: ResultStatus.BadRequest,
             errorField: 'email',
@@ -161,21 +167,21 @@ export const authService = {
 
         const user = await userQueryRepository.findByLoginOrEmail(email);
 
-        if (user.emailConfirmation.isConfirmed) return {
-            status: ResultStatus.BadRequest,
-            errorField: 'email',
-            errorMessage: 'Code confirmation already been applied',
+        if (!user) return {
+            status: ResultStatus.Success,
             data: null
         }
 
+        console.log("Hi test this user!", user)
         const newConfirmationCode = uuidv4();
+
         await userMongoRepository.updateConfirmationCode(user._id, newConfirmationCode, add(new Date(), {
             hours: 1,
             minutes: 3
         }))
 
         try {
-            businessService.sendRecoveryPassword(email, newConfirmationCode);
+            await businessService.sendRecoveryPassword(email, newConfirmationCode);
         } catch (e: unknown) {
             console.error('Send email error', e);
         }

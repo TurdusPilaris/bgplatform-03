@@ -7,6 +7,8 @@ import {
 } from "../../input-output-types/inputOutputTypesMongo";
 import {CustomRateLimitType, DeviceAuthSessionsType} from "../../input-output-types/common/common-types";
 import mongoose from "mongoose";
+import {BlogModel} from "./blog/blog.model";
+import {PostModel} from "./post/post.model";
 // const MONGO_URL="mongodb+srv://drozdovaElena:WIMUTynaAxzPoowP@cluster0.qxhqyca.mongodb.net/?retryWrites=true&w=majority"
 
 console.log("MONGO URL" + SETTING.MONGO_URL)
@@ -46,6 +48,9 @@ export const db = {
                 const collectionName = collection.name
                 await this.getDBName().collection(collectionName).deleteMany({});
             }
+
+            await BlogModel.deleteMany({});
+            await PostModel.deleteMany({});
         } catch (e: unknown) {
             console.log('Error drop', e)
             await this.client.close()
@@ -58,7 +63,6 @@ export const blogCollection = db.getDBName().collection<WithId<BlogDBMongoType>>
 export const postCollection = db.getDBName().collection<WithId<PostDBMongoType>>(SETTING.POST_COLLECTION_NAME);
 export const userCollection = db.getDBName().collection<UserAccountDBMongoType>(SETTING.USER_COLLECTION_NAME);
 export const commentCollection = db.getDBName().collection<CommentDBMongoTypeWithoutID>(SETTING.COMMENT_COLLECTION_NAME);
-export const blackListCollection = db.getDBName().collection<BlackListDBMongoType>(SETTING.BLACK_LIST_COLLECTION_NAME);
 export const customRateLimit  = db.getDBName().collection<CustomRateLimitType>(SETTING.CUSTOM_RATE_LIMIT_COLLECTION_NAME);
 export const deviceAuthSessions = db.getDBName().collection<DeviceAuthSessionsType>(SETTING.DEVICE_AUTH_SESSION_COLLECTION_NAME);
 

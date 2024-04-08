@@ -5,7 +5,7 @@ import {
     apiRequestLimitMiddleware,
     authMiddlewareBearer, authMiddlewareRefreshToken, emailInputValidator,
     inputValidationMiddleware,
-    userInputValidator
+    userInputValidator, userNewPasswordValidator
 } from "../../middlewares/input-validation-middleware";
 import {postRegisrtationConfirmationController} from "./controllers/postRegisrtationConfirmationController";
 import {getInformationMe} from "./controllers/getInformationMeController";
@@ -24,6 +24,6 @@ authRouter.post('/registration-email-resending', apiRequestLimitMiddleware, emai
 authRouter.get('/me', authMiddlewareBearer, getInformationMe)
 authRouter.post('/refresh-token', authMiddlewareRefreshToken, postRefreshTokenController)
 authRouter.post('/logout', authMiddlewareRefreshToken, postLogOutControllers)
-authRouter.post('/new-password', apiRequestLimitMiddleware, postNewPasswordController)
-authRouter.post('/password-recovery', apiRequestLimitMiddleware, postPasswordRecoveryController )
+authRouter.post('/new-password', apiRequestLimitMiddleware,userNewPasswordValidator,inputValidationMiddleware, postNewPasswordController)
+authRouter.post('/password-recovery', apiRequestLimitMiddleware, emailInputValidator, inputValidationMiddleware, postPasswordRecoveryController )
 

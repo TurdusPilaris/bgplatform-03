@@ -12,6 +12,9 @@ import {blogQueryRepository} from "../repositories/blogQueryRepository";
 import {BlogModel} from "../../../db/mongo/blog/blog.model";
 import {blogsMongooseRepository} from "../repositories/blogsMongooseRepository";
 import {postsMongooseRepository} from "../../posts/repositories/postsMongooseRepository";
+import {PostModel} from "../../../db/mongo/post/post.model";
+import {TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
+import {postQueryRepository} from "../../posts/repositories/postQueryRepository";
 
 export const blogsService = {
 
@@ -41,32 +44,44 @@ export const blogsService = {
             status: ResultStatus.Success,
             data: createdBlog
         }
-        // const newBlog = {
-        //     name: input.name,
-        //     description: input.description,
-        //     websiteUrl: input.websiteUrl,
-        //     createdAt: new Date().toISOString(),
-        //     isMembership: false
-        //
-        // }
-        //
-        // return blogsMongoRepository.create(newBlog);
 
     },
 
-    async createPostForBlog(input: TypePostInputModelModel, blogId: string) {
+    async createPostForBlog(dto: TypePostInputModelModel, blogId: string): Promise<ResultObject<TypePostViewModel | null>> {
 
-        const foundedBlog = await blogsMongoRepository.findForOutput(new ObjectId(blogId));
-        const newPost: PostDBMongoType = {
-            title: input.title,
-            shortDescription: input.shortDescription,
-            content: input.content,
-            blogId: foundedBlog?.id,
-            blogName: foundedBlog?.name,
-            createdAt: new Date().toISOString(),
+        if (!ObjectId.isValid(blogId)) {
+            return {
+                status: ResultStatus.NotFound,
+                data: null,
+                errorMessage: 'Blog ID is not valid',
+                errorField: 'blogId'
+            }
         }
-        return postsMongoRepository.create(newPost);
-        // return postsMongooseRepository.create(newPost)
+
+        const foundedBlog = await blogsMongooseRepository.findById(new ObjectId(blogId));
+
+        if (!foundedBlog) {
+            return {
+                status: ResultStatus.NotFound,
+                data: null,
+                errorMessage: 'Blog not found',
+                errorField: 'blogId'
+            }
+        }
+
+        const newPost = new PostModel(dto);
+        newPost.createdAt = new Date().toISOString();
+        newPost.blogId = blogId;
+        newPost.blogName = foundedBlog!.name;
+
+        await postsMongooseRepository.save(newPost);
+
+        const updatedPost = await postQueryRepository.findForOutput(newPost._id)
+
+        return {
+            status: ResultStatus.Success,
+            data: updatedPost
+        }
 
     },
 
@@ -86,7 +101,7 @@ export const blogsService = {
                 data: null
             }
         }
-        // await blogsMongoRepository.delete(id);
+
         const resultOfDelete = await blogsMongooseRepository.deleteBlog(new ObjectId(id));
 
         if (!resultOfDelete) {
@@ -103,16 +118,17 @@ export const blogsService = {
 
     },
     async find(id: ObjectId): Promise<BlogDBMongoType | null> {
-        // return blogCollection.findOne({_id: id});
+
         return blogsMongooseRepository.findById(id)
+
     },
     findForOutput: async function (id: ObjectId) {
 
-        // return blogsMongoRepository.findForOutput(id);
         return blogQueryRepository.findForOutput(id);
 
     },
     mapToOutput(blog: WithId<BlogDBMongoType>): TypeBlogViewModel {
+
         return {
             id: blog._id.toString(),
             name: blog.name,
@@ -121,6 +137,7 @@ export const blogsService = {
             createdAt: blog.createdAt,
             isMembership: false
         }
+
     },
     async updateBlog(id: string, input: TypeBlogInputModel): Promise<ResultObject<TypeBlogViewModel | null>> {
 
@@ -131,16 +148,6 @@ export const blogsService = {
             }
         }
 
-        //OLD
-        // const foundedBlog = await this.find(new ObjectId(id))
-        // if (!foundedBlog) {
-        //     return {
-        //         status: ResultStatus.NotFound,
-        //         data: null
-        //     }
-        // }
-
-        //NEW with mongoose
         const foundedBlog = await blogsMongooseRepository.findById(new ObjectId(id));
         if (!foundedBlog) {
             return {
@@ -157,7 +164,6 @@ export const blogsService = {
             status: ResultStatus.Success,
             data: foundBlog
         }
-
 
     },
     async getAllBlogs(query: HelperQueryTypeBlog): Promise<ResultObject<PaginatorBlogType>> {

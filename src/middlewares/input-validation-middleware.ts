@@ -40,7 +40,7 @@ export const postInputValidatorBlogID =
                 throw new Error('Blog ID is not valid')
             }
             if (blogId) {
-                const foundBlog = await blogsMongoRepository.find(new ObjectId(blogId))
+                const foundBlog = await blogsMongooseRepository.findById(new ObjectId(blogId));
                 if (!foundBlog) {
                     throw new Error('Blog not found')
                 }
@@ -144,12 +144,13 @@ export const authMiddlewareRefreshToken = async (req:Request, res: Response, nex
 export const emailInputValidator =
     [
         body('email').isEmail().withMessage('Invalid email'),
-        body('email').custom(async value => {
-            const countDocuments = await userQueryRepository.getCountDocumentWithFilter(undefined, value);
-            if (countDocuments === 0 ) {
-                throw new Error('user email doesnt exist')
-            }
-        })
+        // body('email').custom(async value => {
+        //     const user = await userQueryRepository.findByLoginOrEmail(value)
+        //         // await userQueryRepository.getCountDocumentWithFilter(undefined, value);
+        //     if (!user ) {
+        //         throw new Error('user email doesnt exist')
+        //     }
+        // })
     ]
 export const userInputValidator =
 
@@ -172,6 +173,11 @@ export const userInputValidator =
         })
     ]
 
+export const userNewPasswordValidator =
+
+    [
+        body('newPassword').trim().isLength({min: 6, max: 20}).withMessage('Field should be from 6 to 20'),
+    ]
 export const commentInputValidator =
 
     [
@@ -182,7 +188,7 @@ export const apiRequestLimitMiddleware = async (req:Request, res: Response, next
 
     const currentDate = new Date();
 
-    const date = new Date(Date.now()-9000)
+    const date = new Date(Date.now()-10000)
 
     const apiInformation: CustomRateLimitType = {
         _id: new ObjectId(),

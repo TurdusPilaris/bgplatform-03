@@ -11,6 +11,7 @@ import {HelperQueryTypeBlog, HelperQueryTypePost} from "../../../input-output-ty
 import {blogsMongooseRepository} from "./blogsMongooseRepository";
 import {BlogModel} from "../../../db/mongo/blog/blog.model";
 import {postQueryRepository} from "../../posts/repositories/postQueryRepository";
+import {PostModel} from "../../../db/mongo/post/post.model";
 
 export const blogQueryRepository = {
 
@@ -25,20 +26,18 @@ export const blogQueryRepository = {
 
         const byID = {blogId: blogId};
 
-        // const search = query.searchNameTerm? {title:{$regex: query.searchNameTerm, $options: 'i'}}: {}
-
-        const items = await postCollection
+        const items = await PostModel
             .find({
                   ...byID,
                    // ...search
             })
-            .sort(query.sortBy, query.sortDirection)
+            .sort({[query.sortBy]: query.sortDirection})
             .skip((query.pageNumber -1)*query.pageSize)
             .limit(query.pageSize)
-            .toArray();
+            .lean();
 
         const itemsForPaginator = items.map(postQueryRepository.mapToOutput);
-        const countPosts = await postCollection.countDocuments({...byID,});
+        const countPosts = await PostModel.countDocuments({...byID,});
         const paginatorPost: PaginatorPostType =
          {
             pagesCount:	Math.ceil(countPosts/query.pageSize),
@@ -49,7 +48,6 @@ export const blogQueryRepository = {
         };
         return paginatorPost;
     },
-
     mapToOutput(blog: WithId<BlogDBMongoType>): TypeBlogViewModel {
         return {
             id: blog._id.toString(),
@@ -64,16 +62,6 @@ export const blogQueryRepository = {
 
         const search = query.searchNameTerm? {name:{$regex: query.searchNameTerm, $options: 'i'}}: {}
 
-        //OLD
-        // const items = await blogCollection
-        //     .find({
-        //          ...search
-        //     })
-        //     .sort(query.sortBy, query.sortDirection)
-        //     .skip((query.pageNumber -1)*query.pageSize)
-        //     .limit(query.pageSize)
-        //     .toArray();
-
         const items = await BlogModel
             .find({
                  ...search
@@ -85,7 +73,6 @@ export const blogQueryRepository = {
 
         const itemsForPaginator = items.map(this.mapToOutput);
 
-        //OLD const countPosts = await blogCollection.countDocuments({...search,});
         const countPosts = await BlogModel.countDocuments({...search,});
 
         const paginatorBlog: PaginatorBlogType =
@@ -99,6 +86,5 @@ export const blogQueryRepository = {
         return paginatorBlog;
 
     },
-
 
 }

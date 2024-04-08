@@ -14,6 +14,7 @@ export const postQueryRepository ={
     async findForOutput(id: ObjectId) {
        // return  await postsMongoRepository.findForOutput(id);
         const foundPost =  await postsMongooseRepository.findById(id);
+        console.log(foundPost)
         if(!foundPost) {return null}
         return this.mapToOutput(foundPost);
     },

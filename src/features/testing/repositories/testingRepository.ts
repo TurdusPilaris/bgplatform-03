@@ -1,14 +1,12 @@
 import {
-    blackListCollection,
-    blogCollection,
-    commentCollection,
-    postCollection,
+    commentCollection, customRateLimit, deviceAuthSessions,
+
     userCollection
 } from "../../../db/mongo/mongo-db";
 import {PostModel} from "../../../db/mongo/post/post.model";
 import {BlogModel} from "../../../db/mongo/blog/blog.model";
 
-export const testingRepository ={
+export const testingRepository = {
 
 
     deleteAll: async function () {
@@ -18,7 +16,8 @@ export const testingRepository ={
         // await blogCollection.deleteMany({});
         await userCollection.deleteMany({});
         await commentCollection.deleteMany({});
-        await blackListCollection.deleteMany({});
+        await customRateLimit.deleteMany({});
+        await deviceAuthSessions.deleteMany({});
 
     }
 }

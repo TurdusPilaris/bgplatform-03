@@ -29,15 +29,11 @@ describe('/posts', () => {
 
     it('GET posts OK 200 = []', async () => {
 
-        const bodyBlog = testSeeder.createBlog();
-        const resBlog = await req
-            .post(SETTING.PATH_BLOGS)
-            .send(bodyBlog)
-            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
 
         const posts = testSeeder.creatPostDtos(resBlog.body.id, resBlog.body.name, 15);
 
-        for(let i = 0; i<posts.length; i++ ){
+        for (let i = 0; i < posts.length; i++) {
             await req
                 .post(SETTING.PATH_POSTS)
                 .send(posts[i])
@@ -45,7 +41,7 @@ describe('/posts', () => {
         }
 
         const res = await req
-            .get(SETTING.PATH_POSTS+"?pageNumber=1&pageSize=11&sortBy=createdAt&sortDirection=asc")
+            .get(SETTING.PATH_POSTS + "?pageNumber=1&pageSize=11&sortBy=createdAt&sortDirection=asc")
             .expect(200);
 
         expect(res.body.items.length).toBe(11);
@@ -58,11 +54,7 @@ describe('/posts', () => {
 
     it('POST posts OK 200 = []', async () => {
 
-        const bodyBlog = testSeeder.createBlog();
-        const resBlog = await req
-            .post(SETTING.PATH_BLOGS)
-            .send(bodyBlog)
-            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
 
         const newPostSeeder = testSeeder.createPost(resBlog.body.id, resBlog.body.name);
 
@@ -80,11 +72,7 @@ describe('/posts', () => {
     })
     it('POST posts invalid authorization 401 = []', async () => {
 
-        const bodyBlog = testSeeder.createBlog();
-        const resBlog = await req
-            .post(SETTING.PATH_BLOGS)
-            .send(bodyBlog)
-            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
 
         const newPostSeeder = testSeeder.createPost(resBlog.body.id, resBlog.body.name);
 
@@ -97,92 +85,81 @@ describe('/posts', () => {
 
     it('POST posts inputModel "title" has incorrect values 400 = []', async () => {
 
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
 
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel(newBlog.insertedId.toString(),
-        //     'a'.repeat(35));
-        //
-        // const res = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //     .expect(400);
-        //
-        // expect(res.body.errorsMessages[0].field).toBe('title');
+        const newPostSeeder = testSeeder.createPostInputModel(resBlog.body.id, 'a'.repeat(35));
+
+        const res = await req
+            .post(SETTING.PATH_POSTS)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(newPostSeeder)
+            .expect(400);
+
+        expect(res.body.errorsMessages[0].field).toBe('title');
+
     })
 
     it('POST posts inputModel "shortDescription" has incorrect values 400 = []', async () => {
 
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel(newBlog.insertedId.toString(), 'test title', 'sada'.repeat(26));
-        //
-        // const res = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //     .expect(400);
-        //
-        // expect(res.body.errorsMessages[0].field).toBe('shortDescription');
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const newPostSeeder = testSeeder.createPostInputModel(resBlog.body.id, 'test title', 'sada'.repeat(26));
+
+        const res = await req
+            .post(SETTING.PATH_POSTS)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(newPostSeeder)
+            .expect(400);
+
+        expect(res.body.errorsMessages[0].field).toBe('shortDescription');
+
     })
 
     it('POST posts inputModel "content" has incorrect values 400 = []', async () => {
 
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel(newBlog.insertedId.toString(), 'test title', 'sada'.repeat(10), 'test'.repeat(251));
-        //
-        // const res = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //     .expect(400);
-        //
-        // expect(res.body.errorsMessages[0].field).toBe('content');
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const newPostSeeder = testSeeder.createPostInputModel(resBlog.body.id, 'test title', 'sada'.repeat(10), 'test'.repeat(251));
+
+        const res = await req
+            .post(SETTING.PATH_POSTS)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(newPostSeeder)
+            .expect(400);
+
+        expect(res.body.errorsMessages[0].field).toBe('content');
+
     })
 
     it('POST posts inputModel "blog Id" has incorrect values 400 = []', async () => {
 
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel('2546464646', 'test title', 'sada'.repeat(10), 'test'.repeat(25));
-        //
-        // const res = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //     .expect(400);
-        //
-        // expect(res.body.errorsMessages[0].field).toBe('blogId');
+        const newPostSeeder = testSeeder.createPostInputModel("2546464646", 'test title', 'sada'.repeat(10), 'test'.repeat(2));
+
+        const res = await req
+            .post(SETTING.PATH_POSTS)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(newPostSeeder)
+            .expect(400);
+
+        expect(res.body.errorsMessages[0].field).toBe('blogId');
+
     })
 
     it('Get posts by id 200 status []', async () => {
 
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel(newBlog.insertedId.toString());
-        //
-        // const resPost = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //
-        //
-        // const res = await req
-        //     .get(SETTING.PATH_POSTS + '/' + resPost.body.id)
-        //     .expect(200)
-        //
-        // expect(res.body.id).toBe(resPost.body.id);
-        // expect(res.body.title).toBe(resPost.body.title);
-        // expect(res.body.blogName).toBe(resPost.body.blogName);
-        // expect(res.body.shortDescription).toBe(resPost.body.shortDescription);
-        // expect(res.body.content).toBe(resPost.body.content);
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const resPost = await testSeeder.sendPostCreatePost(req, resBlog.body)
+
+        const res = await req
+            .get(SETTING.PATH_POSTS + '/' + resPost.body.id)
+            .expect(200)
+
+        expect(res.body.id).toBe(resPost.body.id);
+        expect(res.body.title).toBe(resPost.body.title);
+        expect(res.body.blogName).toBe(resPost.body.blogName);
+        expect(res.body.shortDescription).toBe(resPost.body.shortDescription);
+        expect(res.body.content).toBe(resPost.body.content);
 
     })
 
@@ -193,43 +170,32 @@ describe('/posts', () => {
             .get(SETTING.PATH_POSTS + '/' + uncorrectedId)
             .expect(404)
 
+
     })
 
     it('DELETE posts 401 not auth Unauthorized= []', async () => {
 
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel(newBlog.insertedId.toString());
-        //
-        // const resPost = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //
-        // const res = await req
-        //     .delete(SETTING.PATH_POSTS + '/' + resPost.body.id)
-        //     .set({authorization: UNCORRECT_ADMIN_AUTH_BASE64})
-        //     .expect(401);
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const resPost = await testSeeder.sendPostCreatePost(req, resBlog.body)
+
+        const res = await req
+            .delete(SETTING.PATH_POSTS + '/' + resPost.body.id)
+            .set({authorization: UNCORRECT_ADMIN_AUTH_BASE64})
+            .expect(401);
 
     })
 
     it('DELETE posts success 204 []', async () => {
 
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel(newBlog.insertedId.toString());
-        //
-        // const resPost = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //
-        // const res = await req
-        //     .delete(SETTING.PATH_POSTS + '/' + resPost.body.id)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .expect(204);
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const resPost = await testSeeder.sendPostCreatePost(req, resBlog.body)
+
+        const res = await req
+            .delete(SETTING.PATH_POSTS + '/' + resPost.body.id)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .expect(204);
 
     })
 
@@ -238,7 +204,7 @@ describe('/posts', () => {
         const uncorrectedId = '232323232323232311111111'
 
         const res = await req
-            .delete(SETTING.PATH_POSTS+ '/' + uncorrectedId)
+            .delete(SETTING.PATH_POSTS + '/' + uncorrectedId)
             .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
             .expect(404);
 
@@ -246,158 +212,114 @@ describe('/posts', () => {
 
     it('Put posts by id 200 status []', async () => {
 
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel(newBlog.insertedId.toString());
-        //
-        // const resPost = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //
-        //
-        // const newPostSeederUpdate = testSeeder.createPostInputModel(newBlog.insertedId.toString(), "Post updated",
-        //     "Short updated", "Content Update");
-        //
-        // const res = await req
-        //     .put(SETTING.PATH_POSTS + '/' + resPost.body.id)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeederUpdate)
-        //     .expect(204)
-        //
-        // const postUpdated = await postQueryRepository.findForOutput(new ObjectId(resPost.body.id));
-        //
-        // expect(postUpdated).not.toBeUndefined();
-        //
-        // expect(newPostSeederUpdate.title).toBe(postUpdated!.title);
-        // expect(newPostSeederUpdate.content).toBe(postUpdated!.content);
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const resPost = await testSeeder.sendPostCreatePost(req, resBlog.body);
+
+        const newPostSeederUpdate = testSeeder.createPostInputModel(resBlog.body.id, "Post updated",
+            "Short updated", "Content Update");
+
+        const res = await req
+            .put(SETTING.PATH_POSTS + '/' + resPost.body.id)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(newPostSeederUpdate)
+            .expect(204)
+
+        const postUpdated = await postQueryRepository.findForOutput(new ObjectId(resPost.body.id));
+
+        expect(postUpdated).not.toBeUndefined();
+
+        expect(newPostSeederUpdate.title).toBe(postUpdated!.title);
+        expect(newPostSeederUpdate.content).toBe(postUpdated!.content);
 
     })
 
     it('Put posts by id 400 status "title" []', async () => {
 
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel(newBlog.insertedId.toString());
-        //
-        // const resPost = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //
-        //
-        // const newPostSeederUpdate = testSeeder.createPostInputModel(newBlog.insertedId.toString(), "Post".repeat(10),
-        //     "Short updated", "Content Update");
-        //
-        // const res = await req
-        //     .put(SETTING.PATH_POSTS + '/' + resPost.body.id)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeederUpdate)
-        //     .expect(400)
-        //
-        // expect(res.body.errorsMessages[0].field).toBe('title');
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const resPost = await testSeeder.sendPostCreatePost(req, resBlog.body);
+
+        const newPostSeederUpdate = testSeeder.createPostInputModel(resBlog.body.id, "Post".repeat(10),
+            "Short updated", "Content Update");
+
+        const res = await req
+            .put(SETTING.PATH_POSTS + '/' + resPost.body.id)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(newPostSeederUpdate)
+            .expect(400)
+
+        expect(res.body.errorsMessages[0].field).toBe('title');
 
     })
 
     it('Put posts by id 400 status "short description" []', async () => {
 
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel(newBlog.insertedId.toString());
-        //
-        // const resPost = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //
-        //
-        // const newPostSeederUpdate = testSeeder.createPostInputModel(newBlog.insertedId.toString(), "Post".repeat(3),
-        //     "Short".repeat(40), "Content Update");
-        //
-        // const res = await req
-        //     .put(SETTING.PATH_POSTS + '/' + resPost.body.id)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeederUpdate)
-        //     .expect(400)
-        //
-        // expect(res.body.errorsMessages[0].field).toBe('shortDescription');
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const resPost = await testSeeder.sendPostCreatePost(req, resBlog.body);
+
+        const newPostSeederUpdate = testSeeder.createPostInputModel(resBlog.body.id, "Post".repeat(3),
+            "Short".repeat(40), "Content Update");
+
+        const res = await req
+            .put(SETTING.PATH_POSTS + '/' + resPost.body.id)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(newPostSeederUpdate)
+            .expect(400)
+
+        expect(res.body.errorsMessages[0].field).toBe('shortDescription');
 
     })
 
     it('Put posts by id 400 status "content" []', async () => {
 
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel(newBlog.insertedId.toString());
-        //
-        // const resPost = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //
-        //
-        // const newPostSeederUpdate = testSeeder.createPostInputModel(newBlog.insertedId.toString(), "Post".repeat(3),
-        //     "Short".repeat(10), "Content".repeat(150));
-        //
-        // const res = await req
-        //     .put(SETTING.PATH_POSTS + '/' + resPost.body.id)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeederUpdate)
-        //     .expect(400)
-        //
-        // expect(res.body.errorsMessages[0].field).toBe('content');
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const resPost = await testSeeder.sendPostCreatePost(req, resBlog.body);
+
+        const newPostSeederUpdate = testSeeder.createPostInputModel(resBlog.body.id, "Post".repeat(3),
+            "Short".repeat(10), "Content".repeat(150));
+
+        const res = await req
+            .put(SETTING.PATH_POSTS + '/' + resPost.body.id)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(newPostSeederUpdate)
+            .expect(400)
+
+        expect(res.body.errorsMessages[0].field).toBe('content');
 
     })
 
     it('Put posts by id 401 status Unauthorized []', async () => {
 
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel(newBlog.insertedId.toString());
-        //
-        // const resPost = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //
-        //
-        // const newPostSeederUpdate = testSeeder.createPostInputModel(newBlog.insertedId.toString());
-        //
-        // const res = await req
-        //     .put(SETTING.PATH_POSTS + '/' + resPost.body.id)
-        //     .set({authorization: UNCORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeederUpdate)
-        //     .expect(401)
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const resPost = await testSeeder.sendPostCreatePost(req, resBlog.body);
+
+        const newPostSeederUpdate = testSeeder.createPostInputModel(resBlog.body.id);
+
+        const res = await req
+            .put(SETTING.PATH_POSTS + '/' + resPost.body.id)
+            .set({authorization: UNCORRECT_ADMIN_AUTH_BASE64})
+            .send(newPostSeederUpdate)
+            .expect(401)
 
     })
 
     it('Put posts by id 404 status Not found []', async () => {
 
-        // const uncorrectedId = '232323232323232311111111';
-        //
-        // const newBlogSeeder = testSeeder.createBlog();
-        // const newBlog = await blogCollection.insertOne(newBlogSeeder);
-        //
-        // const newPostSeeder = testSeeder.createPostInputModel(newBlog.insertedId.toString());
-        //
-        // const resPost = await req
-        //     .post(SETTING.PATH_POSTS)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeeder)
-        //
-        //
-        // const newPostSeederUpdate = testSeeder.createPostInputModel(newBlog.insertedId.toString());
-        //
-        // const res = await req
-        //     .put(SETTING.PATH_POSTS + '/' + uncorrectedId)
-        //     .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
-        //     .send(newPostSeederUpdate)
-        //     .expect(404)
+        const uncorrectedId = '232323232323232311111111';
+
+        const resBlog = await testSeeder.sendPostCreateBlog(req);
+
+        const newPostSeederUpdate = testSeeder.createPostInputModel(resBlog.body.id);
+
+        const res = await req
+            .put(SETTING.PATH_POSTS + '/' + uncorrectedId)
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+            .send(newPostSeederUpdate)
+            .expect(404)
 
     })
 

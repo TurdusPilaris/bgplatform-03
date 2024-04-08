@@ -24,4 +24,4 @@ blogsRouter.post('/', authMiddleware, postInputValidatorBlog, inputValidationMid
 blogsRouter.put('/:id', authMiddleware, postInputValidatorBlog, inputValidationMiddleware, putBlogsController);
 blogsRouter.delete('/:id', authMiddleware, deleteBlogsController);
 blogsRouter.get('/:blogId/posts', postInputValidatorBlogID, inputValidationMiddlewareBlogID, getPostsForBlogID);
-blogsRouter.post('/:blogId/posts', authMiddleware, postInputValidatorBlogID, inputValidationMiddlewareBlogID, postInputValidatorPostWithoutBlogID, inputValidationMiddleware, postPostsForBlogsController);
+blogsRouter.post('/:blogId/posts', authMiddleware, postInputValidatorPostWithoutBlogID, inputValidationMiddleware, postPostsForBlogsController);

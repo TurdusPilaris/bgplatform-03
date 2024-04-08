@@ -10,7 +10,7 @@ import {userCollection} from "../src/db/mongo/mongo-db";
 import {TypeBlogInputModel} from "../src/features/blogs/types/inputTypes";
 import {TypePostInputModelModel} from "../src/input-output-types/posts/inputTypes";
 import {SETTING} from "../src/main/setting";
-
+const CORRECT_ADMIN_AUTH_BASE64 = 'Basic YWRtaW46cXdlcnR5';
 export const testSeeder = {
     createUserDTO() {
         return {
@@ -164,5 +164,17 @@ export const testSeeder = {
         return {
             ...newUser
         }
-    }
+    },
+    async sendPostCreateBlog(req:any) {
+        return await req
+            .post(SETTING.PATH_BLOGS)
+            .send(testSeeder.createBlog())
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+    },
+    async sendPostCreatePost(req:any, body: any) {
+        return await req
+            .post(SETTING.PATH_POSTS)
+            .send(this.createPost(body.id, body.name))
+            .set({authorization: CORRECT_ADMIN_AUTH_BASE64})
+    },
 }
