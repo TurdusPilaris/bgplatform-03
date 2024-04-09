@@ -2,13 +2,10 @@ import {ObjectId, WithId} from "mongodb";
 import {
     BlogDBMongoType,
 } from "../../../input-output-types/inputOutputTypesMongo";
-import {blogCollection, postCollection} from "../../../db/mongo/mongo-db";
-import {blogsMongoRepository} from "./blogsMongoRepository";
-import {postsMongoRepository} from "../../posts/repositories/postMongoRepository";
 import {PaginatorBlogType, TypeBlogViewModel} from "../types/outputTypes";
 import {PaginatorPostType} from "../../../input-output-types/posts/outputTypes";
 import {HelperQueryTypeBlog, HelperQueryTypePost} from "../../../input-output-types/inputTypes";
-import {blogsMongooseRepository} from "./blogsMongooseRepository";
+import {blogsRepository} from "./blogsRepository";
 import {BlogModel} from "../../../db/mongo/blog/blog.model";
 import {postQueryRepository} from "../../posts/repositories/postQueryRepository";
 import {PostModel} from "../../../db/mongo/post/post.model";
@@ -16,7 +13,7 @@ import {PostModel} from "../../../db/mongo/post/post.model";
 export const blogQueryRepository = {
 
     findForOutput: async function (id: ObjectId) {
-        const foundBlog = await blogsMongooseRepository.findById(id);
+        const foundBlog = await blogsRepository.findById(id);
         if (!foundBlog) {
             return null
         }

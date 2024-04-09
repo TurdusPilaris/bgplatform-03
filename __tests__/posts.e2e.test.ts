@@ -1,6 +1,6 @@
 import {agent as supertest} from 'supertest';
 import {app} from "../src/main/app";
-import {blogCollection, db, postCollection} from "../src/db/mongo/mongo-db";
+import { db} from "../src/db/mongo/mongo-db";
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {SETTING} from "../src/main/setting";
 import {testSeeder} from "./test.seeder";
@@ -443,7 +443,19 @@ describe('/posts', () => {
             .expect(200);
 
         expect(res.body.items[0].title).toBe(resPost1.body.title)
-        console.log(res.body)
+        expect(res.body.items.length).toBe(2)
+        expect(res.body.pagesCount).toBe(1)
+        expect(res.body.totalCount).toBe(2)
+
+    })
+
+    it('GET posts for blogID endpoint = /blogs/:blogId/posts not found blog id 404', async () => {
+
+        const uncorrectedId = '232323232323232311111111';
+
+        const res = await req
+            .get(`/blogs/${uncorrectedId}/posts?pageNumber=1&pageSize=10&sortBy=createdAt&sortDirection=asc`)
+            .expect(404);
 
     })
 })

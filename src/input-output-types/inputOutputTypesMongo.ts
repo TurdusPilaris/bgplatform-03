@@ -40,16 +40,7 @@ export type InsertedInfoType = {
     "insertedId": ObjectId
 }
 
-export type CommentDBMongoTypeWithoutID = {
-
-    content: string;
-    postId: string;
-    commentatorInfo: CommentatorInfoType,
-    createdAt: string;
-}
-
-export type CommentDBMongoType = {
-    _id: ObjectId;
+export type CommentDBType = {
     content: string;
     postId: string;
     commentatorInfo: CommentatorInfoType,

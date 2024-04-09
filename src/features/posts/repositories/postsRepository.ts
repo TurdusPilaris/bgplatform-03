@@ -1,10 +1,10 @@
 import {PostDocument, PostModel} from "../../../db/mongo/post/post.model";
 import {ObjectId} from "mongodb";
 import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTypes";
-import {blogsMongooseRepository} from "../../blogs/repositories/blogsMongooseRepository";
+import {blogsRepository} from "../../blogs/repositories/blogsRepository";
 
 
-export const postsMongooseRepository = {
+export const postsRepository = {
     async save(post: PostDocument){
 
         const result = await post.save();
@@ -15,7 +15,7 @@ export const postsMongooseRepository = {
     },
     async updatePost(post: PostDocument, dto: TypePostInputModelModel) {
 
-        const blogForPost = await blogsMongooseRepository.findById(new ObjectId(dto.blogId))
+        const blogForPost = await blogsRepository.findById(new ObjectId(dto.blogId))
 
         post.title = dto.title;
         post.shortDescription = dto.shortDescription;

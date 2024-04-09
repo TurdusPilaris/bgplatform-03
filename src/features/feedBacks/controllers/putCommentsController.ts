@@ -1,29 +1,24 @@
-import { Request, Response} from "express";
-import {ObjectId} from "mongodb";
+import {Request, Response} from "express";
 import {ParamsType} from "../../../input-output-types/inputTypes";
 import {CommentInputModelType} from "../../../input-output-types/comments/inputTypes";
 import {CommentViewModelType} from "../../../input-output-types/comments/outputTypes";
 import {feedbacksService} from "../domain/feedbacks-service";
-import {commentQueryRepository} from "../reepositories/commentQueryRepository";
+import {ResultStatus} from "../../../common/types/resultCode";
 
 export const putCommentsController = async (req: Request<ParamsType, CommentInputModelType, any, any>, res: Response<CommentViewModelType>) => {
 
-    if (!ObjectId.isValid(req.params.id)) {
-        res.sendStatus(404);
-    }
+    const resultObject = await feedbacksService.updateComment(req.params.id, req.body, req.userId!)
 
-    const foundedComment = await commentQueryRepository.find(new ObjectId(req.params.id))
-    if (!foundedComment) {
+    if (resultObject.status === ResultStatus.NotFound) {
         res.sendStatus(404);
-        return;
+        return
     }
-    if(foundedComment.commentatorInfo.userId!==req.userId){
+    if (resultObject.status === ResultStatus.Forbidden) {
         res.sendStatus(403);
-        return;
+        return
     }
-    await feedbacksService.updateComment(new ObjectId(req.params.id), req.body);
-    // const editedComment = await commentQueryRepository.findForOutput(new ObjectId(req.params.id));
 
-    res
-        .sendStatus(204)
+    if (resultObject.status === ResultStatus.Success) {
+        res.sendStatus(204)
+    }
 }

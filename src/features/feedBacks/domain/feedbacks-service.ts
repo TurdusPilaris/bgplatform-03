@@ -1,39 +1,158 @@
-import {
-    CommentDBMongoTypeWithoutID,
-} from "../../../input-output-types/inputOutputTypesMongo";
 import {ObjectId} from "mongodb";
 import {userQueryRepository} from "../../users/repositories/userQueryRepository";
 import {commentMongoRepository} from "../reepositories/commentMongoRepository";
 import {CommentInputModelType} from "../../../input-output-types/comments/inputTypes";
+import {postsRepository} from "../../posts/repositories/postsRepository";
+import {ResultStatus} from "../../../common/types/resultCode";
+import {ResultObject} from "../../../common/types/result.types";
+import {CommentViewModelType} from "../../../input-output-types/comments/outputTypes";
+import {CommentModel} from "../../../db/mongo/comment/comment.model";
+import {feedBacksRepository} from "../reepositories/feedBacksRepository";
+import {commentQueryRepository} from "../reepositories/commentQueryRepository";
 
 export const feedbacksService = {
 
-    async createComment(comment: string, postId: string, userId: string) {
+    async createComment(comment: string, postId: string, userId: string): Promise<ResultObject<CommentViewModelType | null>> {
+
+        const post = await postsRepository.findById(new ObjectId(postId));
+
+        if (!post) {
+            return {
+                status: ResultStatus.NotFound,
+                data: null
+            }
+        }
 
         const user = await userQueryRepository.findForOutput(new ObjectId(userId));
 
-        const commentInput: CommentDBMongoTypeWithoutID = {
-            content: comment,
-            postId: postId,
-            commentatorInfo: {
-                userId: userId.toString(),
-                userLogin: user!.login
-            },
-            createdAt: new Date().toISOString()
+        const newComment = new CommentModel();
+        newComment.content = comment;
+        newComment.commentatorInfo.userId = user!.id;
+        newComment.commentatorInfo.userLogin = user!.login;
+        newComment.createdAt = new Date().toISOString();
+
+        const createdCommentId = await feedBacksRepository.saveComment(newComment);
+
+        if (!createdCommentId) {
+            return {
+                status: ResultStatus.InternalServerError,
+                data: null
+            }
         }
 
-        return commentMongoRepository.create(commentInput);
+        const commentForOutput = await commentQueryRepository.findForOutput(createdCommentId);
+
+        return {
+            status: ResultStatus.Success,
+            data: commentForOutput
+        }
+        // const user = await userQueryRepository.findForOutput(new ObjectId(userId));
+        //
+        // const commentInput: CommentDBType = {
+        //     content: comment,
+        //     postId: postId,
+        //     commentatorInfo: {
+        //         userId: userId.toString(),
+        //         userLogin: user!.login
+        //     },
+        //     createdAt: new Date().toISOString()
+        // }
+
+        // const post = await postQueryRepository.findForOutput(new ObjectId(req.params.postId))
+        // if (!post) {
+        //     res.sendStatus(404)
+        //     return
+        // }
+        // const insertedInfo: InsertedInfoType |undefined = await feedbacksService.createComment(req.body.content, req.params.postId, req.userId!);
+        //
+        // if(insertedInfo){
+        //
+        //     const newComment = await  commentQueryRepository.findForOutput(insertedInfo.insertedId);
+        //     res
+        //         .status(201)
+        //         .send(newComment);
+        // }
+
+
+        // const user = await userQueryRepository.findForOutput(new ObjectId(userId));
+        //
+        // const commentInput: CommentDBType = {
+        //     content: comment,
+        //     postId: postId,
+        //     commentatorInfo: {
+        //         userId: userId.toString(),
+        //         userLogin: user!.login
+        //     },
+        //     createdAt: new Date().toISOString()
+        // }
+        //
+        // return commentMongoRepository.create(commentInput);
 
     },
 
-    async deleteComment(id: ObjectId) {
+    async deleteComment(id: string, userId: string) {
 
-        await commentMongoRepository.deleteComment(id);
+        if (!ObjectId.isValid(id)) {
+            return {
+                status: ResultStatus.NotFound,
+                data: null
+            }
+        }
+        const foundedComment = await feedBacksRepository.findById(new ObjectId(id))
+
+        if (!foundedComment) {
+            return {
+                status: ResultStatus.NotFound,
+                data: null
+            }
+        }
+
+        if (foundedComment.commentatorInfo.userId !== userId) {
+            return {
+                status: ResultStatus.Forbidden,
+                data: null
+            }
+        }
+
+        await commentMongoRepository.deleteComment(new ObjectId(id));
+
+        return {
+            status: ResultStatus.Success,
+            data: null
+        }
 
     },
-    async updateComment(id: ObjectId, input: CommentInputModelType) {
+    async updateComment(id: string, dto: CommentInputModelType, userId: string) {
 
-        await commentMongoRepository.updateComment(id, input);
+        if (!ObjectId.isValid(id)) {
+            return {
+                status: ResultStatus.NotFound,
+                data: null
+            }
+        }
+
+        const foundedComment = await feedBacksRepository.findById(new ObjectId(id))
+
+        if (!foundedComment) {
+            return {
+                status: ResultStatus.NotFound,
+                data: null
+            }
+        }
+
+        if (foundedComment.commentatorInfo.userId !== userId) {
+            return {
+                status: ResultStatus.Forbidden,
+                data: null
+            }
+        }
+
+        await feedBacksRepository.updateComment(foundedComment, dto);
+
+        return {
+            status: ResultStatus.Success,
+            data: null
+        }
 
     },
 }

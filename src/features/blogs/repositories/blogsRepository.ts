@@ -5,7 +5,7 @@ import {TypeBlogInputModel} from "../types/inputTypes";
 import {blogCollection} from "../../../db/mongo/mongo-db";
 import {TypeBlogViewModel} from "../types/outputTypes";
 
-export const blogsMongooseRepository = {
+export const blogsRepository = {
 
     async findById(id: ObjectId): Promise<BlogDocument| null> {
         return BlogModel.findOne({_id: id})

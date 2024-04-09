@@ -4,6 +4,7 @@ import {HelperQueryTypeComment} from "../../../input-output-types/inputTypes";
 import {commentQueryRepository} from "../../feedBacks/reepositories/commentQueryRepository";
 import {PaginatorCommentsType} from "../../../input-output-types/comments/outputTypes";
 import {postQueryRepository} from "../repositories/postQueryRepository";
+import {feedbacksService} from "../../feedBacks/domain/feedbacks-service";
 
 const helper = (query: any):HelperQueryTypeComment => {
     return {

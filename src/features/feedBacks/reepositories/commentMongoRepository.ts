@@ -1,7 +1,6 @@
 import {commentCollection} from "../../../db/mongo/mongo-db";
 import {
-    CommentDBMongoType,
-    CommentDBMongoTypeWithoutID,
+    CommentDBType,
     InsertedInfoType
 } from "../../../input-output-types/inputOutputTypesMongo";
 import {ObjectId} from "mongodb";
@@ -9,19 +8,19 @@ import {CommentInputModelType} from "../../../input-output-types/comments/inputT
 
 export const commentMongoRepository = {
 
-    async create(input: CommentDBMongoTypeWithoutID) {
-        console.log('create ')
-        try {
-            const insertedInfo = await commentCollection.insertOne(input);
-            return insertedInfo as InsertedInfoType;
-        } catch (e) {
-
-            return undefined;
-        }
-    },
+    // async create(input: CommentDBType) {
+    //
+    //     try {
+    //         const insertedInfo = await commentCollection.insertOne(input);
+    //         return insertedInfo as InsertedInfoType;
+    //     } catch (e) {
+    //
+    //         return undefined;
+    //     }
+    // },
     async find(id: ObjectId) {
 
-        return await commentCollection.findOne({_id: id}) as CommentDBMongoType;
+        return await commentCollection.findOne({_id: id}) as CommentDBType;
 
     },
     async deleteComment(id: ObjectId) {

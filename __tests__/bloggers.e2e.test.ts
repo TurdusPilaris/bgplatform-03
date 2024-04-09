@@ -1,19 +1,14 @@
 import {agent as supertest} from 'supertest';
 import {app} from "../src/main/app";
-import {blogCollection, db} from "../src/db/mongo/mongo-db";
+import { db} from "../src/db/mongo/mongo-db";
 import {MongoMemoryServer} from "mongodb-memory-server";
-import mongoose from 'mongoose'
 import {SETTING} from "../src/main/setting";
 import {testSeeder} from "./test.seeder";
-import {createUser} from "./createUser";
-import {postQueryRepository} from "../src/features/posts/repositories/postQueryRepository";
 import {ObjectId} from "mongodb";
 import {blogQueryRepository} from "../src/features/blogs/repositories/blogQueryRepository";
 
 const CORRECT_ADMIN_AUTH_BASE64 = 'Basic YWRtaW46cXdlcnR5';
 const UNCORRECT_ADMIN_AUTH_BASE64 = 'Basic YWRtaW46cXdlcnR9';
-// import {describe} from "node:test";
-
 
 const req = supertest(app);
 

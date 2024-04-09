@@ -1,8 +1,10 @@
 import {HelperQueryTypeComment} from "../../../input-output-types/inputTypes";
 import {commentCollection} from "../../../db/mongo/mongo-db";
 import {CommentViewModelType, PaginatorCommentsType} from "../../../input-output-types/comments/outputTypes";
-import {ObjectId} from "mongodb";
-import {CommentDBMongoType} from "../../../input-output-types/inputOutputTypesMongo";
+import {ObjectId, WithId} from "mongodb";
+import {CommentDBType} from "../../../input-output-types/inputOutputTypesMongo";
+import {feedBacksRepository} from "./feedBacksRepository";
+import {CommentModel} from "../../../db/mongo/comment/comment.model";
 
 export const commentQueryRepository = {
 
@@ -10,17 +12,17 @@ export const commentQueryRepository = {
 
         const byID = {postId: postId};
 
-        const items = await commentCollection
+        const items = await CommentModel
             .find({
                 ...byID,
             })
-            .sort(query.sortBy, query.sortDirection)
+            .sort({[query.sortBy]: query.sortDirection})
             .skip((query.pageNumber - 1) * query.pageSize)
             .limit(query.pageSize)
-            .toArray();
+            .lean();
 
-        const itemsForPaginator = items.map(this.mapToOutput);
-        const countComments = await commentCollection.countDocuments({...byID,});
+        const itemsForPaginator = items.map(commentQueryRepository.mapToOutput);
+        const countComments = await CommentModel.countDocuments({...byID,});
         const paginatorComments: PaginatorCommentsType =
             {
                 pagesCount: Math.ceil(countComments / query.pageSize),
@@ -31,19 +33,15 @@ export const commentQueryRepository = {
             };
         return paginatorComments;
     },
-    async find(id: ObjectId) {
-
-        return await commentCollection.findOne({_id: id}) as CommentDBMongoType;
-
-    },
     async findForOutput(id: ObjectId) {
-        const foundComment = await this.find(id);
+        const foundComment = await feedBacksRepository.findById(id);
         if (!foundComment) {
-            return undefined
+            return null;
         }
         return this.mapToOutput(foundComment);
+
     },
-    mapToOutput(comment: CommentDBMongoType): CommentViewModelType {
+    mapToOutput(comment: WithId<CommentDBType>): CommentViewModelType {
         return {
             id: comment._id.toString(),
             content: comment.content,

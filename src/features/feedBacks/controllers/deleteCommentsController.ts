@@ -1,26 +1,23 @@
+import {ResultStatus} from "../../../common/types/resultCode";
 import { Request, Response} from "express";
-import {ObjectId} from "mongodb";
 import {ParamsType} from "../../../input-output-types/inputTypes";
 import {feedbacksService} from "../domain/feedbacks-service";
-import {commentQueryRepository} from "../reepositories/commentQueryRepository";
+
 export const deleteCommentsController = async (req: Request<ParamsType, any, any, any >, res: Response<any>) => {
 
-    if (!ObjectId.isValid(req.params.id)) {
+    const resultObject = await feedbacksService.deleteComment(req.params.id, req.userId!);
+
+    if (resultObject.status === ResultStatus.NotFound) {
         res.sendStatus(404);
+        return
     }
-    const foundComment = await commentQueryRepository.find(new ObjectId(req.params.id))
-    if (!foundComment) {
-        res.sendStatus(404);
-        return;
-    }
-    if(foundComment.commentatorInfo.userId!==req.userId){
+    if (resultObject.status === ResultStatus.Forbidden) {
         res.sendStatus(403);
-        return;
+        return
     }
-    await feedbacksService.deleteComment(new ObjectId(req.params.id));
 
-    res.sendStatus(204);
-    return;
-
+    if (resultObject.status === ResultStatus.Success) {
+        res.sendStatus(204)
+    }
 
 }

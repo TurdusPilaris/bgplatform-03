@@ -1,14 +1,12 @@
 import {body, param, validationResult} from "express-validator";
 import {NextFunction, Request, Response} from "express";
-import {blogsMongoRepository} from "../features/blogs/repositories/blogsMongoRepository";
 import {ObjectId} from "mongodb";
 import {userQueryRepository} from "../features/users/repositories/userQueryRepository";
 import {authService} from "../features/auth/domain/auth-service";
 import {ResultStatus} from "../common/types/resultCode";
 import {customRateLimit} from "../db/mongo/mongo-db";
 import {CustomRateLimitType} from "../input-output-types/common/common-types";
-import {add} from "date-fns";
-import {blogsMongooseRepository} from "../features/blogs/repositories/blogsMongooseRepository";
+import {blogsRepository} from "../features/blogs/repositories/blogsRepository";
 
 export const inputValidationMiddleware = (req:Request, res: Response, next: NextFunction): any => {
 
@@ -40,7 +38,7 @@ export const postInputValidatorBlogID =
                 throw new Error('Blog ID is not valid')
             }
             if (blogId) {
-                const foundBlog = await blogsMongooseRepository.findById(new ObjectId(blogId));
+                const foundBlog = await blogsRepository.findById(new ObjectId(blogId));
                 if (!foundBlog) {
                     throw new Error('Blog not found')
                 }
@@ -67,7 +65,7 @@ export const postInputValidatorPost =
                 throw new Error('Blog ID is not valid')
             }
             if(value) {
-            const foundBlog = await blogsMongooseRepository.findById(new ObjectId(value))
+            const foundBlog = await blogsRepository.findById(new ObjectId(value))
             if(!foundBlog) {
                 throw new Error('Blog not found')
             }}

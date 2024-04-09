@@ -1,19 +1,17 @@
 import {
     PostDBMongoType,
 } from "../../../input-output-types/inputOutputTypesMongo";
-import { postCollection} from "../../../db/mongo/mongo-db";
 import {ObjectId, WithId} from "mongodb";
 import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 import {HelperQueryTypePost} from "../../../input-output-types/inputTypes";
-import {postsMongoRepository} from "./postMongoRepository";
-import {postsMongooseRepository} from "./postsMongooseRepository";
+import {postsRepository} from "./postsRepository";
 import {PostModel} from "../../../db/mongo/post/post.model";
 
 export const postQueryRepository ={
 
     async findForOutput(id: ObjectId) {
-       // return  await postsMongoRepository.findForOutput(id);
-        const foundPost =  await postsMongooseRepository.findById(id);
+
+        const foundPost =  await postsRepository.findById(id);
         console.log(foundPost)
         if(!foundPost) {return null}
         return this.mapToOutput(foundPost);
@@ -32,14 +30,7 @@ export const postQueryRepository ={
     },
     getAllPosts: async function (query:HelperQueryTypePost) {
 
-        // const items = await postCollection
-        //     .find({})
-        //     .sort(query.sortBy, query.sortDirection)
-        //     .skip((query.pageNumber -1)*query.pageSize)
-        //     .limit(query.pageSize)
-        //     .toArray();
-
-        const items = await PostModel
+       const items = await PostModel
             .find({})
             .sort({[query.sortBy]: query.sortDirection})
             .skip((query.pageNumber -1)*query.pageSize)
@@ -47,7 +38,7 @@ export const postQueryRepository ={
             .lean();
 
         const itemsForPaginator = items.map(this.mapToOutput);
-        // const countPosts = await postCollection.countDocuments({});
+
         const countPosts = await PostModel.countDocuments({});
         const paginatorPost: PaginatorPostType =
             {

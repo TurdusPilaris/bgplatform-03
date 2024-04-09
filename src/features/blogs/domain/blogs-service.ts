@@ -1,17 +1,15 @@
-import {blogsMongoRepository} from "../repositories/blogsMongoRepository";
 import {ObjectId, WithId} from "mongodb";
 import {BlogDBMongoType, PostDBMongoType,} from "../../../input-output-types/inputOutputTypesMongo";
 import {TypeBlogInputModel} from "../types/inputTypes";
 import {PaginatorBlogType, TypeBlogViewModel} from "../types/outputTypes";
 import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTypes";
-import {postsMongoRepository} from "../../posts/repositories/postMongoRepository";
 import {ResultObject} from "../../../common/types/result.types";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {HelperQueryTypeBlog} from "../../../input-output-types/inputTypes";
 import {blogQueryRepository} from "../repositories/blogQueryRepository";
 import {BlogModel} from "../../../db/mongo/blog/blog.model";
-import {blogsMongooseRepository} from "../repositories/blogsMongooseRepository";
-import {postsMongooseRepository} from "../../posts/repositories/postsMongooseRepository";
+import {blogsRepository} from "../repositories/blogsRepository";
+import {postsRepository} from "../../posts/repositories/postsRepository";
 import {PostModel} from "../../../db/mongo/post/post.model";
 import {TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 import {postQueryRepository} from "../../posts/repositories/postQueryRepository";
@@ -24,7 +22,7 @@ export const blogsService = {
         newBlog.createdAt = new Date().toISOString();
         newBlog.isMembership = false;
 
-        const createdBlogId = await blogsMongooseRepository.save(newBlog);
+        const createdBlogId = await blogsRepository.save(newBlog);
 
         if (!createdBlogId) {
             return {
@@ -58,7 +56,7 @@ export const blogsService = {
             }
         }
 
-        const foundedBlog = await blogsMongooseRepository.findById(new ObjectId(blogId));
+        const foundedBlog = await blogsRepository.findById(new ObjectId(blogId));
 
         if (!foundedBlog) {
             return {
@@ -74,7 +72,7 @@ export const blogsService = {
         newPost.blogId = blogId;
         newPost.blogName = foundedBlog!.name;
 
-        await postsMongooseRepository.save(newPost);
+        await postsRepository.save(newPost);
 
         const updatedPost = await postQueryRepository.findForOutput(newPost._id)
 
@@ -102,7 +100,7 @@ export const blogsService = {
             }
         }
 
-        const resultOfDelete = await blogsMongooseRepository.deleteBlog(new ObjectId(id));
+        const resultOfDelete = await blogsRepository.deleteBlog(new ObjectId(id));
 
         if (!resultOfDelete) {
             return {
@@ -119,7 +117,7 @@ export const blogsService = {
     },
     async find(id: ObjectId): Promise<BlogDBMongoType | null> {
 
-        return blogsMongooseRepository.findById(id)
+        return blogsRepository.findById(id)
 
     },
     findForOutput: async function (id: ObjectId) {
@@ -148,7 +146,7 @@ export const blogsService = {
             }
         }
 
-        const foundedBlog = await blogsMongooseRepository.findById(new ObjectId(id));
+        const foundedBlog = await blogsRepository.findById(new ObjectId(id));
         if (!foundedBlog) {
             return {
                 status: ResultStatus.NotFound,
@@ -156,7 +154,7 @@ export const blogsService = {
             }
         }
 
-        await blogsMongooseRepository.updateBlog(foundedBlog, input);
+        await blogsRepository.updateBlog(foundedBlog, input);
 
         const foundBlog = await blogQueryRepository.findForOutput(foundedBlog._id);
 
