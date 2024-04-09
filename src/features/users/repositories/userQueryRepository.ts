@@ -1,8 +1,8 @@
 import {
-    UserAccountDBMongoType,
+    UserAccountDBType,
 } from "../../../input-output-types/inputOutputTypesMongo";
 import {userCollection} from "../../../db/mongo/mongo-db";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {UserQueryType} from "../../../input-output-types/inputTypes";
 import {userMongoRepository} from "./usersMongoRepositories";
 import {MeViewModelType, PaginatorUserType, UserViewModelType} from "../../../input-output-types/users/outputTypes";
@@ -15,7 +15,7 @@ export const userQueryRepository ={
     async findForOutput(id: ObjectId) {
         return  await userMongoRepository.findForOutput(id);
     },
-    mapToOutput(user: UserAccountDBMongoType):UserViewModelType {
+    mapToOutput(user: WithId<UserAccountDBType>):UserViewModelType {
         return {
             id: user._id.toString(),
             login: user.accountData.userName,
@@ -74,17 +74,17 @@ export const userQueryRepository ={
                 {"accountData.email": { $regex: loginOrEmail ?? '', $options: 'i'}},
             ]
         }
-        return await userCollection.findOne(filterLoginOrEmail) as UserAccountDBMongoType;
+        return await userCollection.findOne(filterLoginOrEmail);
 
     },
     async findByCodeConfirmation(code: string) {
         const filterCodeConfirmation =
                 {"emailConfirmation.confirmationCode": { $regex: code ?? '', $options: 'i'}}
 
-        return await userCollection.findOne(filterCodeConfirmation) as UserAccountDBMongoType;
+        return await userCollection.findOne(filterCodeConfirmation);
 
     },
-    mapToOutputMe(user: UserAccountDBMongoType):MeViewModelType {
+    mapToOutputMe(user: WithId<UserAccountDBType>):MeViewModelType {
         return {
             login: user.accountData.userName,
             email: user.accountData.email,

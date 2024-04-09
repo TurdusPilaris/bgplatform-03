@@ -9,9 +9,9 @@ import {CommentViewModelType} from "../../../input-output-types/comments/outputT
 import {CommentModel} from "../../../db/mongo/comment/comment.model";
 import {feedBacksRepository} from "../reepositories/feedBacksRepository";
 import {commentQueryRepository} from "../reepositories/commentQueryRepository";
+import {CommentDBType2} from "../../../input-output-types/inputOutputTypesMongo";
 
-export const feedbacksService = {
-
+class FeedbacksService {
     async createComment(comment: string, postId: string, userId: string): Promise<ResultObject<CommentViewModelType | null>> {
 
         const post = await postsRepository.findById(new ObjectId(postId));
@@ -25,8 +25,17 @@ export const feedbacksService = {
 
         const user = await userQueryRepository.findForOutput(new ObjectId(userId));
 
+        //lets go classes
+        // let newComment = new CommentDBType2(
+        //     new ObjectId(),
+        //     comment,
+        //     postId,
+        //     {userId:  user!.id, userLogin: user!.login},
+        //     new Date().toISOString()
+        // )
         const newComment = new CommentModel();
         newComment.content = comment;
+        newComment.postId = postId;
         newComment.commentatorInfo.userId = user!.id;
         newComment.commentatorInfo.userLogin = user!.login;
         newComment.createdAt = new Date().toISOString();
@@ -46,49 +55,8 @@ export const feedbacksService = {
             status: ResultStatus.Success,
             data: commentForOutput
         }
-        // const user = await userQueryRepository.findForOutput(new ObjectId(userId));
-        //
-        // const commentInput: CommentDBType = {
-        //     content: comment,
-        //     postId: postId,
-        //     commentatorInfo: {
-        //         userId: userId.toString(),
-        //         userLogin: user!.login
-        //     },
-        //     createdAt: new Date().toISOString()
-        // }
 
-        // const post = await postQueryRepository.findForOutput(new ObjectId(req.params.postId))
-        // if (!post) {
-        //     res.sendStatus(404)
-        //     return
-        // }
-        // const insertedInfo: InsertedInfoType |undefined = await feedbacksService.createComment(req.body.content, req.params.postId, req.userId!);
-        //
-        // if(insertedInfo){
-        //
-        //     const newComment = await  commentQueryRepository.findForOutput(insertedInfo.insertedId);
-        //     res
-        //         .status(201)
-        //         .send(newComment);
-        // }
-
-
-        // const user = await userQueryRepository.findForOutput(new ObjectId(userId));
-        //
-        // const commentInput: CommentDBType = {
-        //     content: comment,
-        //     postId: postId,
-        //     commentatorInfo: {
-        //         userId: userId.toString(),
-        //         userLogin: user!.login
-        //     },
-        //     createdAt: new Date().toISOString()
-        // }
-        //
-        // return commentMongoRepository.create(commentInput);
-
-    },
+    }
 
     async deleteComment(id: string, userId: string) {
 
@@ -121,7 +89,7 @@ export const feedbacksService = {
             data: null
         }
 
-    },
+    }
     async updateComment(id: string, dto: CommentInputModelType, userId: string) {
 
         if (!ObjectId.isValid(id)) {
@@ -154,5 +122,8 @@ export const feedbacksService = {
             data: null
         }
 
-    },
+    }
 }
+
+/////////////////////////////////////////////////////////////
+export const feedbacksService = new FeedbacksService();

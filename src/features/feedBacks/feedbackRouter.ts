@@ -9,6 +9,11 @@ import {putCommentsController} from "./controllers/putCommentsController";
 //
 export const feedbackRouter = Router()
 
+// class FeedbackRouter {
+//     getCommentsControllerById
+//     deleteCommentsController
+//     putCommentsController
+// }
 feedbackRouter.get("/:id", getCommentsControllerById)
 feedbackRouter.delete("/:id", authMiddlewareBearer, deleteCommentsController)
 feedbackRouter.put("/:id", authMiddlewareBearer, commentInputValidator, inputValidationMiddleware, putCommentsController)

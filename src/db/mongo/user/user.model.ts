@@ -1,19 +1,25 @@
-// import *as mongoose from "mongoose";
-// import { WithId} from "mongodb";
-// import {Model, model, HydratedDocument} from "mongoose";
-// import {BlogDBMongoType, UserAccountDBMongoType} from "../../../input-output-types/inputOutputTypesMongo";
-//
-// type UserModel = Model<WithId<UserAccountDBMongoType>>
-//
-// export type BlogDocument = HydratedDocument<WithId<BlogDBMongoType>>
-//
-// export const UserSchema = new mongoose.Schema<WithId<BlogDBMongoType>>({
-//     name:{type: String, required: true, max: 15},
-//     description:{type: String, required: true, max: 500},
-//     websiteUrl: {type: String, required: true, max: 100},
-//     createdAt: {type: String},
-//     isMembership: {type: Boolean, default: false},
-//
-// })
-//
-// export const BlogModel = model<WithId<BlogDBMongoType>, BlogModel>('blogs', BlogSchema);
+import *as mongoose from "mongoose";
+import { WithId} from "mongodb";
+import {Model, model, HydratedDocument} from "mongoose";
+
+ import {UserAccountDBType} from "../../../input-output-types/inputOutputTypesMongo";
+
+type UserModel = Model<WithId<UserAccountDBType>>
+
+export type UserDocument = HydratedDocument<WithId<UserAccountDBType>>
+
+ export const UserSchema = new mongoose.Schema<WithId<UserAccountDBType>>({
+        accountData:{
+            userName: {type: String, required: true},
+            email:{type: String, required: true},
+            passwordHash:{type: String, required: true},
+            createdAt: {type: String}
+        },
+        emailConfirmation: {
+            confirmationCode: {type: String},
+            expirationDate: {type: Date},
+            isConfirmed: {type: Boolean, default: false}
+        }
+ })
+
+ export const UserModel = model<WithId<UserAccountDBType>, UserModel>('users', UserSchema);

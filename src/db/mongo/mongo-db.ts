@@ -3,7 +3,7 @@ import {SETTING} from "../../main/setting";
 import {
     BlogDBMongoType,
     CommentDBType, PostDBMongoType,
-    UserAccountDBMongoType,
+    UserAccountDBType,
 } from "../../input-output-types/inputOutputTypesMongo";
 import {CustomRateLimitType, DeviceAuthSessionsType} from "../../input-output-types/common/common-types";
 import mongoose from "mongoose";
@@ -61,7 +61,7 @@ export const db = {
 // export const db = client.db(SETTING.DB_NAME)
 export const blogCollection = db.getDBName().collection<WithId<BlogDBMongoType>>(SETTING.BLOG_COLLECTION_NAME);
 export const postCollection = db.getDBName().collection<WithId<PostDBMongoType>>(SETTING.POST_COLLECTION_NAME);
-export const userCollection = db.getDBName().collection<UserAccountDBMongoType>(SETTING.USER_COLLECTION_NAME);
+export const userCollection = db.getDBName().collection<WithId<UserAccountDBType>>(SETTING.USER_COLLECTION_NAME);
 export const commentCollection = db.getDBName().collection<WithId<CommentDBType>>(SETTING.COMMENT_COLLECTION_NAME);
 export const customRateLimit  = db.getDBName().collection<CustomRateLimitType>(SETTING.CUSTOM_RATE_LIMIT_COLLECTION_NAME);
 export const deviceAuthSessions = db.getDBName().collection<DeviceAuthSessionsType>(SETTING.DEVICE_AUTH_SESSION_COLLECTION_NAME);

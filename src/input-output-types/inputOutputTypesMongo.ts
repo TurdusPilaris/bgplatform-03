@@ -9,8 +9,7 @@ export type PostDBMongoType = {
     createdAt: string;
 }
 
-export type UserAccountDBMongoType = {
-    _id: ObjectId;
+export type UserAccountDBType = {
     accountData: AccountDataType;
     emailConfirmation: EmailConfirmationType;
 }
@@ -52,8 +51,11 @@ export type CommentatorInfoType = {
     userLogin: string
 }
 
-export type BlackListDBMongoType = {
-    _id: ObjectId;
-    refreshToken: string;
-    userId: string;
+export class CommentDBType2 {
+    constructor(public _id: ObjectId,
+                public content: string,
+                public postId: string,
+                public commentatorInfo: CommentatorInfoType,
+                public createdAt: string
+    ) {   }
 }

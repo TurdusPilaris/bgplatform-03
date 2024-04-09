@@ -1,9 +1,9 @@
 import {
-    UserAccountDBMongoType,
+     UserAccountDBType,
 
 } from "../../../input-output-types/inputOutputTypesMongo";
 import {userCollection} from "../../../db/mongo/mongo-db";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {UserInputModelType} from "../../../input-output-types/users/inputTypes";
 import {userMongoRepository} from "../repositories/usersMongoRepositories";
 import {bcryptService} from "../../../common/adapters/bcrypt-service";
@@ -14,7 +14,7 @@ export const usersService = {
 
         const passwordHash = await bcryptService.generationHash(input.password);
 
-        const newUser: UserAccountDBMongoType = {
+        const newUser: WithId<UserAccountDBType> = {
             _id: new ObjectId(),
             accountData:{
                 userName: input.login,

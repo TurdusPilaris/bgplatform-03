@@ -1,13 +1,13 @@
 import {
-    InsertedInfoType, UserAccountDBMongoType
+    InsertedInfoType, UserAccountDBType
 } from "../../../input-output-types/inputOutputTypesMongo";
 import { userCollection} from "../../../db/mongo/mongo-db";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {userQueryRepository} from "./userQueryRepository";
 
 
 export const userMongoRepository = {
-    async create(input: UserAccountDBMongoType) {
+    async create(input: WithId<UserAccountDBType>) {
 
         try {
             const insertedInfo = await userCollection.insertOne(input);
