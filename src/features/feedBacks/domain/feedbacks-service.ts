@@ -1,12 +1,10 @@
 import {ObjectId} from "mongodb";
 import {userQueryRepository} from "../../users/repositories/userQueryRepository";
-import {commentMongoRepository} from "../reepositories/commentMongoRepository";
 import {CommentInputModelType} from "../../../input-output-types/comments/inputTypes";
 import {postsRepository} from "../../posts/repositories/postsRepository";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {ResultObject} from "../../../common/types/result.types";
 import {CommentViewModelType} from "../../../input-output-types/comments/outputTypes";
-import {CommentModel} from "../../../db/mongo/comment/comment.model";
 import {feedBacksRepository} from "../reepositories/feedBacksRepository";
 import {commentQueryRepository} from "../reepositories/commentQueryRepository";
 import {CommentDBType2} from "../../../input-output-types/inputOutputTypesMongo";
@@ -26,19 +24,19 @@ class FeedbacksService {
         const user = await userQueryRepository.findForOutput(new ObjectId(userId));
 
         //lets go classes
-        // let newComment = new CommentDBType2(
-        //     new ObjectId(),
-        //     comment,
-        //     postId,
-        //     {userId:  user!.id, userLogin: user!.login},
-        //     new Date().toISOString()
-        // )
-        const newComment = new CommentModel();
-        newComment.content = comment;
-        newComment.postId = postId;
-        newComment.commentatorInfo.userId = user!.id;
-        newComment.commentatorInfo.userLogin = user!.login;
-        newComment.createdAt = new Date().toISOString();
+        let newComment = new CommentDBType2(
+            new ObjectId(),
+            comment,
+            postId,
+            {userId:  user!.id, userLogin: user!.login},
+            new Date().toISOString()
+        )
+        // const newComment = new CommentModel();
+        // newComment.content = comment;
+        // newComment.postId = postId;
+        // newComment.commentatorInfo.userId = user!.id;
+        // newComment.commentatorInfo.userLogin = user!.login;
+        // newComment.createdAt = new Date().toISOString();
 
         const createdCommentId = await feedBacksRepository.saveComment(newComment);
 
@@ -82,7 +80,7 @@ class FeedbacksService {
             }
         }
 
-        await commentMongoRepository.deleteComment(new ObjectId(id));
+        await feedBacksRepository.deleteComment(new ObjectId(id));
 
         return {
             status: ResultStatus.Success,

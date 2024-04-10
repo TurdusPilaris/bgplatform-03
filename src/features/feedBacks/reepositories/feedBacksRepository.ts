@@ -1,12 +1,14 @@
 import {CommentDocument, CommentModel} from "../../../db/mongo/comment/comment.model";
 import {ObjectId} from "mongodb";
-import { PostModel} from "../../../db/mongo/post/post.model";
 import {CommentInputModelType} from "../../../input-output-types/comments/inputTypes";
+import {CommentDBType2} from "../../../input-output-types/inputOutputTypesMongo";
 
 export const feedBacksRepository = {
-    async saveComment(comment: CommentDocument){
+    async saveComment(comment: CommentDBType2){
 
-        const result = await comment.save();
+        let newComment = new CommentModel(comment);
+
+        const result = await newComment.save();
         return result._id;
     },
     async findById(id: ObjectId): Promise<CommentDocument| null> {

@@ -1,6 +1,4 @@
 import {Router} from "express";
-import {getBlogsController} from "./controllers/getBlogsController";
-import {deleteBlogsController} from "./controllers/deleteBlogsController";
 import {
     authMiddleware,
     inputValidationMiddleware,
@@ -9,19 +7,15 @@ import {
     postInputValidatorBlogID,
     postInputValidatorPostWithoutBlogID,
 } from "../../middlewares/input-validation-middleware";
-import {getBlogsControllerByID} from "./controllers/getBlogsControllerByID";
-import {postBlogsController} from "./controllers/postBlogsController";
-import {putBlogsController} from "./controllers/putBlogsController";
-import {getPostsForBlogID} from "./controllers/getPostsForBlogIDController";
-import {postPostsForBlogsController} from "./controllers/postPostsForBlogsController";
 
-
+import {BlogsController} from "./controllers/blogsController";
 export const blogsRouter = Router();
+export const blogController = new BlogsController();
 
-blogsRouter.get('/', getBlogsController);
-blogsRouter.get('/:id', getBlogsControllerByID);
-blogsRouter.post('/', authMiddleware, postInputValidatorBlog, inputValidationMiddleware, postBlogsController);
-blogsRouter.put('/:id', authMiddleware, postInputValidatorBlog, inputValidationMiddleware, putBlogsController);
-blogsRouter.delete('/:id', authMiddleware, deleteBlogsController);
-blogsRouter.get('/:blogId/posts', postInputValidatorBlogID, inputValidationMiddlewareBlogID, getPostsForBlogID);
-blogsRouter.post('/:blogId/posts', authMiddleware, postInputValidatorPostWithoutBlogID, inputValidationMiddleware, postPostsForBlogsController);
+blogsRouter.get('/', blogController.getBlogsController);
+blogsRouter.get('/:id', blogController.getBlogsControllerByID);
+blogsRouter.post('/', authMiddleware, postInputValidatorBlog, inputValidationMiddleware, blogController.postBlogsController);
+blogsRouter.put('/:id', authMiddleware, postInputValidatorBlog, inputValidationMiddleware, blogController.putBlogsController);
+blogsRouter.delete('/:id', authMiddleware, blogController.deleteBlogsController);
+blogsRouter.get('/:blogId/posts', postInputValidatorBlogID, inputValidationMiddlewareBlogID, blogController.getPostsForBlogID);
+blogsRouter.post('/:blogId/posts', authMiddleware, postInputValidatorPostWithoutBlogID, inputValidationMiddleware, blogController.postPostsForBlogsController);

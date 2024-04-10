@@ -1,5 +1,6 @@
 import {Router} from "express";
-import {deleteAllController} from "./controllers/deleteAllController";
+import {TestingController} from "./controllers/testingController";
 export const testingRouter = Router();
 
-testingRouter.delete('/all-data', deleteAllController);
+export const testingController = new TestingController();
+testingRouter.delete('/all-data', testingController.deleteAllController);
