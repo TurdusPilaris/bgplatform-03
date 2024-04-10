@@ -2,18 +2,21 @@ import {Request, Response} from "express";
 import {HelperQueryTypeBlog, HelperQueryTypePost, ParamsType} from "../../../input-output-types/inputTypes";
 import {TypeBlogInputModel} from "../types/inputTypes";
 import {TypeBlogViewModel} from "../types/outputTypes";
-import {blogsService} from "../domain/blogs-service";
+import {BlogsService} from "../domain/blogs-service";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {ObjectId, SortDirection} from "mongodb";
-import {blogQueryRepository} from "../repositories/blogQueryRepository";
 import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTypes";
 import {PaginatorPostType} from "../../../input-output-types/posts/outputTypes";
+import {BlogsQueryRepository} from "../repositories/blogQueryRepository";
+
 
 export class BlogsController {
+    constructor(protected blogsService: BlogsService,
+                protected blogsQueryRepository: BlogsQueryRepository) {}
     async postBlogsController(req: Request<ParamsType, TypeBlogInputModel>, res: Response<TypeBlogViewModel|null>) {
 
         //NEW
-        const resultObject = await blogsService.create(req.body);
+        const resultObject = await this.blogsService.create(req.body);
 
         if(resultObject.status === ResultStatus.InternalServerError){
             res.sendStatus(500);
@@ -29,7 +32,7 @@ export class BlogsController {
     }
     async putBlogsController(req: Request<ParamsType, TypeBlogInputModel>, res: Response<TypeBlogViewModel>) {
 
-        const resultObject = await blogsService.updateBlog(req.params.id, req.body);
+        const resultObject = await this.blogsService.updateBlog(req.params.id, req.body);
 
         if (!resultObject.data) {
             if (resultObject.status === ResultStatus.NotFound) {
@@ -44,7 +47,7 @@ export class BlogsController {
     }
     async deleteBlogsController(req: Request<ParamsType>, res: Response) {
 
-        const resultObject = await blogsService.deleteBlog(req.params.id);
+        const resultObject = await this.blogsService.deleteBlog(req.params.id);
 
         if (resultObject.status === ResultStatus.NotFound) {
             res.sendStatus(404);
@@ -64,7 +67,7 @@ export class BlogsController {
             res.sendStatus(404)
             return;
         }
-        const foundBlog = await blogQueryRepository.findForOutput(new ObjectId(req.params.id));
+        const foundBlog = await this.blogsQueryRepository.findForOutput(new ObjectId(req.params.id));
         if(!foundBlog) {
             res.sendStatus(404)
             return;
@@ -87,7 +90,7 @@ export class BlogsController {
             return queryHelper;
         }
 
-        const result = await blogsService.getAllBlogs(helper(req.query));
+        const result = await this.blogsService.getAllBlogs(helper(req.query));
 
         res
 
@@ -97,7 +100,7 @@ export class BlogsController {
     }
     async postPostsForBlogsController(req: Request<{ blogId: string}, TypePostInputModelModel, any, any>, res: Response) {
 
-        const resultObject = await blogsService.createPostForBlog(req.body, req.params.blogId);
+        const resultObject = await this.blogsService.createPostForBlog(req.body, req.params.blogId);
 
         if (resultObject.status === ResultStatus.NotFound) {
             res
@@ -123,7 +126,7 @@ export class BlogsController {
 
         }
 
-        const answer = await blogQueryRepository.getMany(helper(req.query), req.params.blogId);
+        const answer = await this.blogsQueryRepository.getMany(helper(req.query), req.params.blogId);
         res
             .status(200)
             .send(answer);

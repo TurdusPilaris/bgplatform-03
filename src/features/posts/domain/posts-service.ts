@@ -1,4 +1,4 @@
-import {ObjectId, WithId} from "mongodb";
+import {ObjectId} from "mongodb";
 import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTypes";
 import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 
@@ -7,11 +7,11 @@ import {PostModel} from "../../../db/mongo/post/post.model";
 import {postsRepository} from "../repositories/postsRepository";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {ResultObject} from "../../../common/types/result.types";
-import {PaginatorBlogType, TypeBlogViewModel} from "../../blogs/types/outputTypes";
 import {postQueryRepository} from "../repositories/postQueryRepository";
-import {HelperQueryTypeBlog, HelperQueryTypePost} from "../../../input-output-types/inputTypes";
+import {HelperQueryTypePost} from "../../../input-output-types/inputTypes";
 
-export const postsService = {
+class PostsService{
+
     async create(dto: TypePostInputModelModel): Promise<ResultObject<TypePostViewModel | null>> {
 
         const foundedBlog = await blogQueryRepository.findForOutput(new ObjectId(dto.blogId));
@@ -42,12 +42,12 @@ export const postsService = {
             data: createdPost
         }
 
-    },
+    }
     async find(id: ObjectId) {
 
         return postsRepository.findById(id);
 
-    },
+    }
     async deletePost(id: string): Promise<ResultObject<null>> {
 
         if (!ObjectId.isValid(id)) {
@@ -79,7 +79,7 @@ export const postsService = {
             status: ResultStatus.Success,
             data: null
         }
-    },
+    }
     async updatePost(id: string, dto: TypePostInputModelModel): Promise<ResultObject<TypePostViewModel | null>> {
 
         if (!ObjectId.isValid(id)) {
@@ -105,7 +105,7 @@ export const postsService = {
             status: ResultStatus.Success,
             data: updatedPost
         }
-    },
+    }
     async getAllPosts(query: HelperQueryTypePost): Promise<ResultObject<PaginatorPostType>> {
 
         const allPostWithPaginator = await postQueryRepository.getAllPosts(query)
@@ -114,6 +114,8 @@ export const postsService = {
             status: ResultStatus.Success,
             data: allPostWithPaginator
         }
-    },
+    }
 
 }
+
+export const postsService = new PostsService();

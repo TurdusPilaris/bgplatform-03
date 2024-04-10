@@ -5,20 +5,25 @@ import {
 import {PaginatorBlogType, TypeBlogViewModel} from "../types/outputTypes";
 import {PaginatorPostType} from "../../../input-output-types/posts/outputTypes";
 import {HelperQueryTypeBlog, HelperQueryTypePost} from "../../../input-output-types/inputTypes";
-import {blogsRepository} from "./blogsRepository";
-import {BlogModel} from "../../../db/mongo/blog/blog.model";
+import {BlogDocument, BlogModel} from "../../../db/mongo/blog/blog.model";
 import {postQueryRepository} from "../../posts/repositories/postQueryRepository";
 import {PostModel} from "../../../db/mongo/post/post.model";
+import {BlogsRepository} from "./blogsRepository";
+// import {blogsRepository} from "./blogsRepository";
 
-export const blogQueryRepository = {
+export class BlogsQueryRepository{
+// export const blogQueryRepository = {
 
-    findForOutput: async function (id: ObjectId) {
-        const foundBlog = await blogsRepository.findById(id);
+    async findById(id: ObjectId): Promise<BlogDocument| null> {
+        return BlogModel.findOne({_id: id})
+    }
+    async findForOutput(id: ObjectId) {
+        const foundBlog = await this.findById(id);
         if (!foundBlog) {
             return null
         }
         return this.mapToOutput(foundBlog as WithId<BlogDBMongoType>);
-    },
+    }
     async getMany(query:HelperQueryTypePost, blogId: string)  {
 
         const byID = {blogId: blogId};
@@ -44,7 +49,7 @@ export const blogQueryRepository = {
             items: itemsForPaginator
         };
         return paginatorPost;
-    },
+    }
     mapToOutput(blog: WithId<BlogDBMongoType>): TypeBlogViewModel {
         return {
             id: blog._id.toString(),
@@ -54,8 +59,8 @@ export const blogQueryRepository = {
             createdAt: blog.createdAt,
             isMembership: false
         }
-    },
-    getAllBlogs: async function (query:HelperQueryTypeBlog) {
+    }
+    async getAllBlogs(query:HelperQueryTypeBlog) {
 
         const search = query.searchNameTerm? {name:{$regex: query.searchNameTerm, $options: 'i'}}: {}
 
@@ -82,6 +87,6 @@ export const blogQueryRepository = {
             };
         return paginatorBlog;
 
-    },
+    }
 
 }

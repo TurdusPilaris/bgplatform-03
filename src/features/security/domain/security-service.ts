@@ -5,7 +5,7 @@ import {ResultStatus} from "../../../common/types/resultCode";
 import {ObjectId} from "mongodb";
 import {securityQueryRepository} from "../repository/securityQueryRepository";
 
-export const securityService = {
+class SecurityService{
 
     async createSession(payload: any, deviceName: string, ip: string | undefined): Promise<ResultObject<ObjectId | null>> {
 
@@ -38,11 +38,11 @@ export const securityService = {
             status: ResultStatus.Success,
             data: result
         };
-    },
+    }
     async deleteNonCurrentSessions(userId: string, currentDeviceId: string) {
 
         await securityMongoRepository.deleteNonCurrentSessions(userId, currentDeviceId);
-    },
+    }
     async deleteSessionByDeviceID(userId: string, deviceId: string): Promise<ResultObject> {
 
         const session = await securityQueryRepository.getSessionByDeviceID(deviceId);
@@ -77,7 +77,7 @@ export const securityService = {
             data: null
         }
 
-    },
+    }
     async dropCurrentSession(userId: string, currentDeviceId: string) {
 
         await securityMongoRepository.deleteCurrentSessions(userId, currentDeviceId);
@@ -85,3 +85,4 @@ export const securityService = {
     }
 }
 
+export const securityService = new SecurityService();
