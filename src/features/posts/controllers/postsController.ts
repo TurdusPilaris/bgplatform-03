@@ -1,21 +1,25 @@
 import {Request, Response} from "express";
 import {TypeBlogInputModel} from "../../blogs/types/inputTypes";
-import {postsService} from "../domain/posts-service";
+import {PostsService} from "../domain/posts-service";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {HelperQueryTypeComment, HelperQueryTypePost, ParamsType} from "../../../input-output-types/inputTypes";
 import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTypes";
 import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 import {ObjectId, SortDirection} from "mongodb";
-import {postQueryRepository} from "../repositories/postQueryRepository";
 import {PaginatorCommentsType} from "../../../input-output-types/comments/outputTypes";
-import {commentQueryRepository} from "../../feedBacks/reepositories/commentQueryRepository";
-import {feedbacksService} from "../../feedBacks/domain/feedbacks-service";
+import {FeedBacksQueryRepository} from "../../feedBacks/reepositories/feedBackQueryRepository";
+import {FeedbacksService} from "../../feedBacks/domain/feedbacks-service";
+import {PostsQueryRepository} from "../repositories/postsQueryRepository";
 
 export class PostsController {
+    constructor(protected postsService: PostsService,
+                protected feedbackService: FeedbacksService,
+                protected feedBacksQueryRepository: FeedBacksQueryRepository,
+                protected postsQueryRepository: PostsQueryRepository) {}
     async postForPostsController(req: Request<TypeBlogInputModel>, res: Response) {
 
         //NEW
-        const resultObject = await postsService.create(req.body);
+        const resultObject = await this.postsService.create(req.body);
 
         if(resultObject.status === ResultStatus.InternalServerError){
             res.sendStatus(500);
@@ -30,7 +34,7 @@ export class PostsController {
     }
     async putPostsController(req: Request<ParamsType, TypePostInputModelModel, any, any>, res: Response<TypePostViewModel>) {
 
-        const resultObject = await  postsService.updatePost(req.params.id, req.body);
+        const resultObject = await  this.postsService.updatePost(req.params.id, req.body);
 
         if (!resultObject.data) {
             if (resultObject.status === ResultStatus.NotFound) {
@@ -48,7 +52,7 @@ export class PostsController {
             return;
         }
 
-        const foundPost = await postQueryRepository.findForOutput(new ObjectId(req.params.id));
+        const foundPost = await this.postsQueryRepository.findForOutput(new ObjectId(req.params.id));
         if(!foundPost) {
             res.sendStatus(404)
             return
@@ -71,7 +75,7 @@ export class PostsController {
             return queryHelper;
         }
 
-        const result = await postsService.getAllPosts(helper(req.query))
+        const result = await this.postsService.getAllPosts(helper(req.query))
 
         res
             .status(200)
@@ -80,7 +84,7 @@ export class PostsController {
     }
     async deletePostsController(req: Request<ParamsType>, res: Response) {
 
-        const resultObject = await postsService.deletePost(req.params.id);
+        const resultObject = await this.postsService.deletePost(req.params.id);
 
         if (resultObject.status === ResultStatus.NotFound) {
             res.sendStatus(404);
@@ -106,19 +110,19 @@ export class PostsController {
 
         }
 
-        const post = await postQueryRepository.findForOutput(new ObjectId(req.params.postId))
+        const post = await this.postsQueryRepository.findForOutput(new ObjectId(req.params.postId))
         if (!post) {
             res.sendStatus(404)
             return
         }
-        const answer = await commentQueryRepository.getMany(helper(req.query), req.params.postId);
+        const answer = await this.feedBacksQueryRepository.getMany(helper(req.query), req.params.postId);
         res
             .status(200)
             .send(answer);
     }
     async postCommentsForPostController(req: Request, res: Response) {
 
-        const resultObject = await feedbacksService.createComment(req.body.content, req.params.postId, req.userId!);
+        const resultObject = await this.feedbackService.createComment(req.body.content, req.params.postId, req.userId!);
 
         if(resultObject.status === ResultStatus.NotFound){
             res.sendStatus(404);

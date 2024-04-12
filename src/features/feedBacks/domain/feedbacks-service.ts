@@ -1,18 +1,23 @@
 import {ObjectId} from "mongodb";
-import {userQueryRepository} from "../../users/repositories/userQueryRepository";
+import {UsersQueryRepository} from "../../users/repositories/userQueryRepository";
 import {CommentInputModelType} from "../../../input-output-types/comments/inputTypes";
-import {postsRepository} from "../../posts/repositories/postsRepository";
+import {PostsRepository, } from "../../posts/repositories/postsRepository";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {ResultObject} from "../../../common/types/result.types";
 import {CommentViewModelType} from "../../../input-output-types/comments/outputTypes";
-import {feedBacksRepository} from "../reepositories/feedBacksRepository";
-import {commentQueryRepository} from "../reepositories/commentQueryRepository";
-import {CommentDBType2} from "../../../input-output-types/inputOutputTypesMongo";
+import {FeedBacksRepository} from "../reepositories/feedBacksRepository";
+import {CommentDB} from "../../../input-output-types/inputOutputTypesMongo";
+import {FeedBacksQueryRepository} from "../reepositories/feedBackQueryRepository";
 
-class FeedbacksService {
+export class FeedbacksService {
+    constructor(
+        protected feedBacksRepository: FeedBacksRepository,
+        protected feedBacksQueryRepository: FeedBacksQueryRepository,
+        protected usersQueryRepository: UsersQueryRepository,
+        protected postsRepository: PostsRepository) {}
     async createComment(comment: string, postId: string, userId: string): Promise<ResultObject<CommentViewModelType | null>> {
 
-        const post = await postsRepository.findById(new ObjectId(postId));
+        const post = await this.postsRepository.findById(new ObjectId(postId));
 
         if (!post) {
             return {
@@ -21,15 +26,13 @@ class FeedbacksService {
             }
         }
 
-        const user = await userQueryRepository.findForOutput(new ObjectId(userId));
+        const user = await this.usersQueryRepository.findForOutput(new ObjectId(userId));
 
         //lets go classes
-        let newComment = new CommentDBType2(
-            new ObjectId(),
+        let newComment = new CommentDB(
             comment,
             postId,
-            {userId:  user!.id, userLogin: user!.login},
-            new Date().toISOString()
+            {userId:  user!.id, userLogin: user!.login}
         )
         // const newComment = new CommentModel();
         // newComment.content = comment;
@@ -38,7 +41,7 @@ class FeedbacksService {
         // newComment.commentatorInfo.userLogin = user!.login;
         // newComment.createdAt = new Date().toISOString();
 
-        const createdCommentId = await feedBacksRepository.saveComment(newComment);
+        const createdCommentId = await this.feedBacksRepository.saveComment(newComment);
 
         if (!createdCommentId) {
             return {
@@ -47,7 +50,7 @@ class FeedbacksService {
             }
         }
 
-        const commentForOutput = await commentQueryRepository.findForOutput(createdCommentId);
+        const commentForOutput = await this.feedBacksQueryRepository.findForOutput(createdCommentId);
 
         return {
             status: ResultStatus.Success,
@@ -64,7 +67,7 @@ class FeedbacksService {
                 data: null
             }
         }
-        const foundedComment = await feedBacksRepository.findById(new ObjectId(id))
+        const foundedComment = await this.feedBacksRepository.findById(new ObjectId(id))
 
         if (!foundedComment) {
             return {
@@ -80,7 +83,7 @@ class FeedbacksService {
             }
         }
 
-        await feedBacksRepository.deleteComment(new ObjectId(id));
+        await this.feedBacksRepository.deleteComment(new ObjectId(id));
 
         return {
             status: ResultStatus.Success,
@@ -97,7 +100,7 @@ class FeedbacksService {
             }
         }
 
-        const foundedComment = await feedBacksRepository.findById(new ObjectId(id))
+        const foundedComment = await this.feedBacksRepository.findById(new ObjectId(id))
 
         if (!foundedComment) {
             return {
@@ -113,7 +116,7 @@ class FeedbacksService {
             }
         }
 
-        await feedBacksRepository.updateComment(foundedComment, dto);
+        await this.feedBacksRepository.updateComment(foundedComment, dto);
 
         return {
             status: ResultStatus.Success,
@@ -122,6 +125,3 @@ class FeedbacksService {
 
     }
 }
-
-/////////////////////////////////////////////////////////////
-export const feedbacksService = new FeedbacksService();

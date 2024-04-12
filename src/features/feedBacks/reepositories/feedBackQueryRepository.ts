@@ -2,11 +2,11 @@ import {HelperQueryTypeComment} from "../../../input-output-types/inputTypes";
 import {commentCollection} from "../../../db/mongo/mongo-db";
 import {CommentViewModelType, PaginatorCommentsType} from "../../../input-output-types/comments/outputTypes";
 import {ObjectId, WithId} from "mongodb";
-import {CommentDBType} from "../../../input-output-types/inputOutputTypesMongo";
-import {feedBacksRepository} from "./feedBacksRepository";
-import {CommentModel} from "../../../db/mongo/comment/comment.model";
+import {CommentDB} from "../../../input-output-types/inputOutputTypesMongo";
+import {CommentDocument, CommentModel} from "../../../db/mongo/comment/comment.model";
 
-export const commentQueryRepository = {
+export class FeedBacksQueryRepository{
+// export const commentQueryRepository = {
 
     async getMany(query: HelperQueryTypeComment, postId: string) {
 
@@ -21,7 +21,7 @@ export const commentQueryRepository = {
             .limit(query.pageSize)
             .lean();
 
-        const itemsForPaginator = items.map(commentQueryRepository.mapToOutput);
+        const itemsForPaginator = items.map(this.mapToOutput);
         const countComments = await CommentModel.countDocuments({...byID,});
         const paginatorComments: PaginatorCommentsType =
             {
@@ -32,16 +32,19 @@ export const commentQueryRepository = {
                 items: itemsForPaginator
             };
         return paginatorComments;
-    },
+    }
+    async findById(id: ObjectId): Promise<CommentDocument| null> {
+        return CommentModel.findOne({_id: id})
+    }
     async findForOutput(id: ObjectId) {
-        const foundComment = await feedBacksRepository.findById(id);
+        const foundComment = await this.findById(id);
         if (!foundComment) {
             return null;
         }
         return this.mapToOutput(foundComment);
 
-    },
-    mapToOutput(comment: WithId<CommentDBType>): CommentViewModelType {
+    }
+    mapToOutput(comment: WithId<CommentDB>): CommentViewModelType {
         return {
             id: comment._id.toString(),
             content: comment.content,

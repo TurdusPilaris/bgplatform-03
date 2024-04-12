@@ -1,12 +1,11 @@
 import {body, param, validationResult} from "express-validator";
 import {NextFunction, Request, Response} from "express";
 import {ObjectId} from "mongodb";
-import {userQueryRepository} from "../features/users/repositories/userQueryRepository";
 import {authService} from "../features/auth/domain/auth-service";
 import {ResultStatus} from "../common/types/resultCode";
 import {customRateLimit} from "../db/mongo/mongo-db";
 import {CustomRateLimitType} from "../input-output-types/common/common-types";
-import {blogsRepository} from "../features/blogs/repositories/blogsRepository";
+import {blogsRepository, usersQueryRepository} from "../composition-root";
 
 export const inputValidationMiddleware = (req:Request, res: Response, next: NextFunction): any => {
 
@@ -157,14 +156,14 @@ export const userInputValidator =
         body('password').trim().isLength({min: 6, max: 20}).withMessage('Field should be from 6 to 20'),
         body('email').isEmail().withMessage('Invalid email'),
         body('login').custom(async value => {
-            const countDocuments = await userQueryRepository.getCountDocumentWithFilter(value, undefined);
+            const countDocuments = await usersQueryRepository.getCountDocumentWithFilter(value, undefined);
             if (countDocuments > 0) {
                 throw new Error('login is not unique')
             }
         })
         ,
         body('email').custom(async value => {
-            const countDocuments = await userQueryRepository.getCountDocumentWithFilter(undefined, value);
+            const countDocuments = await usersQueryRepository.getCountDocumentWithFilter(undefined, value);
             if (countDocuments > 0 && value.length>0) {
                 throw new Error('email is not unique')
             }

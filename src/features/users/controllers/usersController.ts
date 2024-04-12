@@ -1,23 +1,28 @@
 import {Request, Response} from "express";
 import {UserInputModelType} from "../../../input-output-types/users/inputTypes";
 import {UserViewModelType} from "../../../input-output-types/users/outputTypes";
-import {InsertedInfoType} from "../../../input-output-types/inputOutputTypesMongo";
-import {usersService} from "../domain/users-service";
+import {UsersService} from "../domain/users-service";
 import {ParamsType, UserQueryType} from "../../../input-output-types/inputTypes";
-import {userQueryRepository} from "../repositories/userQueryRepository";
+import {UsersQueryRepository} from "../repositories/userQueryRepository";
 import {ObjectId} from "mongodb";
+import {ResultStatus} from "../../../common/types/resultCode";
 
 export class UsersController{
+    constructor(
+        protected usersService:UsersService,
+        protected usersQueryRepository: UsersQueryRepository) {}
     async postUserController(req: Request<UserInputModelType, any, any, any>, res: Response<UserViewModelType>) {
 
-        const insertedInfo: InsertedInfoType |undefined = await usersService.create(req.body);
+         const resultObject = await this.usersService.create(req.body);
 
-        if(insertedInfo){
-            const newUser = await  usersService.findForOutput(insertedInfo.insertedId);
-            res
-                .status(201)
-                .send(newUser);
+        if(resultObject.status === ResultStatus.InternalServerError) {
+            res.sendStatus(500);
+            return;
         }
+         if(resultObject.status === ResultStatus.Success) {
+             res.status(201)
+                 .send(resultObject.data!)
+         }
 
     }
     async getUsersController(req: Request, res: Response) {
@@ -38,7 +43,7 @@ export class UsersController{
 
         res
             .status(200)
-            .send(await userQueryRepository.getAllUsers(helper(req.query)));
+            .send(await this.usersQueryRepository.getAllUsers(helper(req.query)));
 
     }
     async deleteUsersController(req: Request<ParamsType>, res: Response) {
@@ -46,12 +51,12 @@ export class UsersController{
         if (!ObjectId.isValid(req.params.id)) {
             res.sendStatus(404);
         }
-        const foundUser = await usersService.find(new ObjectId(req.params.id))
+        const foundUser = await this.usersService.find(new ObjectId(req.params.id))
         if (!foundUser) {
             res.sendStatus(404);
             return;
         }
-        await usersService.deleteUser(new ObjectId(req.params.id));
+        await this.usersService.deleteUser(new ObjectId(req.params.id));
 
         res.sendStatus(204);
         return;

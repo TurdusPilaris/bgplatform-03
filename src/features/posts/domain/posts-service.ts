@@ -2,25 +2,32 @@ import {ObjectId} from "mongodb";
 import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTypes";
 import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 
-import {blogQueryRepository} from "../../blogs/repositories/blogQueryRepository";
+import {BlogsQueryRepository} from "../../blogs/repositories/blogQueryRepository";
 import {PostModel} from "../../../db/mongo/post/post.model";
-import {postsRepository} from "../repositories/postsRepository";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {ResultObject} from "../../../common/types/result.types";
-import {postQueryRepository} from "../repositories/postQueryRepository";
+import {PostsQueryRepository} from "../repositories/postsQueryRepository";
 import {HelperQueryTypePost} from "../../../input-output-types/inputTypes";
+import {PostsRepository} from "../repositories/postsRepository";
+import {BlogsRepository} from "../../blogs/repositories/blogsRepository";
 
-class PostsService{
+export class PostsService{
 
+    constructor(
+        protected postsRepository: PostsRepository,
+        protected postsQueryRepository: PostsQueryRepository,
+        protected blogsRepository: BlogsRepository,
+        protected blogsQueryRepository: BlogsQueryRepository
+        ) {}
     async create(dto: TypePostInputModelModel): Promise<ResultObject<TypePostViewModel | null>> {
 
-        const foundedBlog = await blogQueryRepository.findForOutput(new ObjectId(dto.blogId));
+        const foundedBlog = await this.blogsQueryRepository.findForOutput(new ObjectId(dto.blogId));
 
         const newPost = new PostModel(dto);
         newPost.createdAt = new Date().toISOString();
         newPost.blogName = foundedBlog!.name;
 
-        const createdPostID = await postsRepository.save(newPost);
+        const createdPostID = await this.postsRepository.save(newPost);
 
         if (!createdPostID) {
             return {
@@ -29,7 +36,7 @@ class PostsService{
             }
         }
 
-        const createdPost = await postQueryRepository.findForOutput(new ObjectId(createdPostID));
+        const createdPost = await this.postsQueryRepository.findForOutput(new ObjectId(createdPostID));
 
         if (!createdPost) {
             return {
@@ -45,7 +52,7 @@ class PostsService{
     }
     async find(id: ObjectId) {
 
-        return postsRepository.findById(id);
+        return this.postsRepository.findById(id);
 
     }
     async deletePost(id: string): Promise<ResultObject<null>> {
@@ -57,7 +64,7 @@ class PostsService{
             }
         }
 
-        const foundPost = await postQueryRepository.findForOutput(new ObjectId(id));
+        const foundPost = await this.postsQueryRepository.findForOutput(new ObjectId(id));
 
         if (!foundPost) {
             return {
@@ -66,7 +73,7 @@ class PostsService{
             }
         }
 
-        const resultOfDelete = await postsRepository.deletePost(new ObjectId(id));
+        const resultOfDelete = await this.postsRepository.deletePost(new ObjectId(id));
 
         if (!resultOfDelete) {
             return {
@@ -88,7 +95,7 @@ class PostsService{
                 data: null
             }
         }
-        const foundedPost = await postsRepository.findById(new ObjectId(id));
+        const foundedPost = await this.postsRepository.findById(new ObjectId(id));
 
         if (!foundedPost) {
             return {
@@ -97,9 +104,10 @@ class PostsService{
             }
         }
 
-        await postsRepository.updatePost(foundedPost, dto);
+        const blogForPost = await this.blogsRepository.findById(new ObjectId(dto.blogId))
+        await this.postsRepository.updatePost(foundedPost, dto, blogForPost);
 
-        const updatedPost = await postQueryRepository.findForOutput(foundedPost._id)
+        const updatedPost = await this.postsQueryRepository.findForOutput(foundedPost._id)
 
         return {
             status: ResultStatus.Success,
@@ -108,7 +116,7 @@ class PostsService{
     }
     async getAllPosts(query: HelperQueryTypePost): Promise<ResultObject<PaginatorPostType>> {
 
-        const allPostWithPaginator = await postQueryRepository.getAllPosts(query)
+        const allPostWithPaginator = await this.postsQueryRepository.getAllPosts(query)
 
         return {
             status: ResultStatus.Success,
@@ -118,4 +126,3 @@ class PostsService{
 
 }
 
-export const postsService = new PostsService();

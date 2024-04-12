@@ -4,18 +4,19 @@ import {
 import {ObjectId, WithId} from "mongodb";
 import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 import {HelperQueryTypePost} from "../../../input-output-types/inputTypes";
-import {postsRepository} from "./postsRepository";
-import {PostModel} from "../../../db/mongo/post/post.model";
+import {PostDocument, PostModel} from "../../../db/mongo/post/post.model";
 
-export const postQueryRepository ={
+export class PostsQueryRepository {
 
+    async findById(id: ObjectId): Promise<PostDocument| null> {
+        return PostModel.findOne({_id: id})
+    }
     async findForOutput(id: ObjectId) {
 
-        const foundPost =  await postsRepository.findById(id);
-        console.log(foundPost)
+        const foundPost =  await this.findById(id);
         if(!foundPost) {return null}
         return this.mapToOutput(foundPost);
-    },
+    }
     mapToOutput(post: WithId<PostDBMongoType>):TypePostViewModel {
         return {
             id: post._id.toString(),
@@ -27,8 +28,8 @@ export const postQueryRepository ={
             createdAt: post.createdAt||'',
 
         }
-    },
-    getAllPosts: async function (query:HelperQueryTypePost) {
+    }
+    async getAllPosts(query:HelperQueryTypePost) {
 
        const items = await PostModel
             .find({})
@@ -50,6 +51,6 @@ export const postQueryRepository ={
             };
         return paginatorPost;
 
-    },
+    }
 
 }

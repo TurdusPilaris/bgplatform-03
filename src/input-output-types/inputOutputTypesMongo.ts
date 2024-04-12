@@ -4,8 +4,8 @@ export type PostDBMongoType = {
     title: string;
     shortDescription: string;
     content: string;
-    blogId: string|undefined;
-    blogName: string|undefined;
+    blogId: string | undefined;
+    blogName: string | undefined;
     createdAt: string;
 }
 
@@ -39,23 +39,38 @@ export type InsertedInfoType = {
     "insertedId": ObjectId
 }
 
-export type CommentDBType = {
-    content: string;
-    postId: string;
-    commentatorInfo: CommentatorInfoType,
-    createdAt: string
-}
+// export type CommentDBType = {
+//     content: string;
+//     postId: string;
+//     commentatorInfo: CommentatorInfoType,
+//     createdAt: string
+// }
 
 export type CommentatorInfoType = {
     userId: string,
     userLogin: string
 }
 
-export class CommentDBType2 {
-    constructor(public _id: ObjectId,
-                public content: string,
-                public postId: string,
-                public commentatorInfo: CommentatorInfoType,
-                public createdAt: string
-    ) {   }
+export class CommentDB {
+    _id: ObjectId
+    createdAt: string
+
+    constructor(
+        public content: string,
+        public postId: string,
+        public commentatorInfo: CommentatorInfoType
+    ) {
+        this._id = new ObjectId(),
+            this.createdAt = new Date().toISOString()
+    }
+}
+
+export class UserDB {
+    _id: ObjectId
+    constructor(
+        public accountData: AccountDataType,
+        public emailConfirmation: EmailConfirmationType
+    ) {
+        this._id = new ObjectId()
+    }
 }

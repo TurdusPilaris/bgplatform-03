@@ -4,10 +4,9 @@ import {
     inputValidationMiddleware,
     postInputValidatorPost
 } from "../../middlewares/input-validation-middleware";
-import {PostsController} from "./controllers/postsController";
+import {postsController} from "../../composition-root";
 
 export const postsRouter = Router();
-export const postsController = new PostsController();
 
 postsRouter.get('/', postsController.getPostsController);
 postsRouter.get('/:id', postsController.getPostsControllerByID);

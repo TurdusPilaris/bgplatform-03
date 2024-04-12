@@ -1,20 +1,26 @@
 import {
-    InsertedInfoType, UserAccountDBType
+    UserAccountDBType
 } from "../../../input-output-types/inputOutputTypesMongo";
 import { userCollection} from "../../../db/mongo/mongo-db";
 import {ObjectId, WithId} from "mongodb";
 import {userQueryRepository} from "./userQueryRepository";
+import {UserModel} from "../../../db/mongo/user/user.model";
 
 
 export const userMongoRepository = {
-    async create(input: WithId<UserAccountDBType>) {
+    async create(userDto: WithId<UserAccountDBType>) {
 
-        try {
-            const insertedInfo = await userCollection.insertOne(input);
-            return insertedInfo as InsertedInfoType;
-        } catch (e) {
-            return undefined;
-        }
+        let newUser = new UserModel(userDto);
+
+        let createdUser = await newUser.save();
+
+        // return crea
+        // try {
+        //     const insertedInfo = await userCollection.insertOne(input);
+        //     return insertedInfo as InsertedInfoType;
+        // } catch (e) {
+        //     return undefined;
+        // }
 
     },
 

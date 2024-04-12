@@ -1,18 +1,15 @@
 import {ObjectId, WithId} from "mongodb";
 import {
-    BlogDBMongoType,
+    BlogDBMongoType, PostDBMongoType,
 } from "../../../input-output-types/inputOutputTypesMongo";
 import {PaginatorBlogType, TypeBlogViewModel} from "../types/outputTypes";
-import {PaginatorPostType} from "../../../input-output-types/posts/outputTypes";
+import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 import {HelperQueryTypeBlog, HelperQueryTypePost} from "../../../input-output-types/inputTypes";
 import {BlogDocument, BlogModel} from "../../../db/mongo/blog/blog.model";
-import {postQueryRepository} from "../../posts/repositories/postQueryRepository";
 import {PostModel} from "../../../db/mongo/post/post.model";
-import {BlogsRepository} from "./blogsRepository";
-// import {blogsRepository} from "./blogsRepository";
+
 
 export class BlogsQueryRepository{
-// export const blogQueryRepository = {
 
     async findById(id: ObjectId): Promise<BlogDocument| null> {
         return BlogModel.findOne({_id: id})
@@ -38,7 +35,7 @@ export class BlogsQueryRepository{
             .limit(query.pageSize)
             .lean();
 
-        const itemsForPaginator = items.map(postQueryRepository.mapToOutput);
+        const itemsForPaginator = items.map(this.mapToOutputForPosts);
         const countPosts = await PostModel.countDocuments({...byID,});
         const paginatorPost: PaginatorPostType =
          {
@@ -58,6 +55,18 @@ export class BlogsQueryRepository{
             websiteUrl: blog.websiteUrl,
             createdAt: blog.createdAt,
             isMembership: false
+        }
+    }
+    mapToOutputForPosts(post: WithId<PostDBMongoType>):TypePostViewModel {
+        return {
+            id: post._id.toString(),
+            title: post.title,
+            shortDescription: post.shortDescription||'',
+            content: post.content||'',
+            blogId: post.blogId||'',
+            blogName: post.blogName||'',
+            createdAt: post.createdAt||'',
+
         }
     }
     async getAllBlogs(query:HelperQueryTypeBlog) {

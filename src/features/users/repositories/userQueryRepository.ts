@@ -9,12 +9,11 @@ import {MeViewModelType, PaginatorUserType, UserViewModelType} from "../../../in
 import {ResultObject} from "../../../common/types/result.types";
 import {ResultStatus} from "../../../common/types/resultCode";
 
-
-export const userQueryRepository ={
+export class UsersQueryRepository{
 
     async findForOutput(id: ObjectId) {
         return  await userMongoRepository.findForOutput(id);
-    },
+    }
     mapToOutput(user: WithId<UserAccountDBType>):UserViewModelType {
         return {
             id: user._id.toString(),
@@ -23,9 +22,8 @@ export const userQueryRepository ={
             createdAt: user.accountData.createdAt,
 
         }
-    },
-
-    getAllUsers: async function (query:UserQueryType) {
+    }
+    async getAllUsers(query:UserQueryType) {
 
         const filterLoginOrEmail = {
             $or:[
@@ -54,19 +52,18 @@ export const userQueryRepository ={
         return paginatorPost;
 
 
-    },
-
+    }
     loginOrEmailFilter(nameUser: string|undefined, email: string|undefined) {
 
         if(nameUser) return {"accountData.userName": nameUser};
         if(email) return {"accountData.email": email};
         return {}
-    },
-    getCountDocumentWithFilter: async function (login:string|undefined, email: string|undefined) {
+    }
+    async getCountDocumentWithFilter(login:string|undefined, email: string|undefined) {
 
         return await userCollection.countDocuments(this.loginOrEmailFilter(login, email));
 
-    },
+    }
     async findByLoginOrEmail(loginOrEmail: string) {
         const filterLoginOrEmail = {
             $or:[
@@ -76,14 +73,14 @@ export const userQueryRepository ={
         }
         return await userCollection.findOne(filterLoginOrEmail);
 
-    },
+    }
     async findByCodeConfirmation(code: string) {
         const filterCodeConfirmation =
                 {"emailConfirmation.confirmationCode": { $regex: code ?? '', $options: 'i'}}
 
         return await userCollection.findOne(filterCodeConfirmation);
 
-    },
+    }
     mapToOutputMe(user: WithId<UserAccountDBType>):MeViewModelType {
         return {
             login: user.accountData.userName,
@@ -91,7 +88,7 @@ export const userQueryRepository ={
             userId: user._id.toString(),
 
         }
-    },
+    }
     async getAboutMe(userId: string | null):Promise<ResultObject<MeViewModelType|null>> {
         if(!userId) return {
             status: ResultStatus.NotFound,

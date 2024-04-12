@@ -1,64 +1,89 @@
-import {
-     UserAccountDBType,
-
-} from "../../../input-output-types/inputOutputTypesMongo";
+import {UserDB} from "../../../input-output-types/inputOutputTypesMongo";
 import {userCollection} from "../../../db/mongo/mongo-db";
-import {ObjectId, WithId} from "mongodb";
+import {ObjectId} from "mongodb";
 import {UserInputModelType} from "../../../input-output-types/users/inputTypes";
 import {userMongoRepository} from "../repositories/usersMongoRepositories";
 import {bcryptService} from "../../../common/adapters/bcrypt-service";
-import {userQueryRepository} from "../repositories/userQueryRepository";
+import {UsersQueryRepository} from "../repositories/userQueryRepository";
+import {UsersRepository} from "../repositories/usersRepository";
+import {ResultStatus} from "../../../common/types/resultCode";
+import {ResultObject} from "../../../common/types/result.types";
+import {UserViewModelType} from "../../../input-output-types/users/outputTypes";
 
-export const usersService = {
-    async create(input: UserInputModelType) {
+export class UsersService {
+    constructor(
+        protected usersRepository: UsersRepository,
+        protected usersQueryRepository: UsersQueryRepository
+    ) {}
+
+    async create(input: UserInputModelType) :Promise<ResultObject<UserViewModelType|null>> {
 
         const passwordHash = await bcryptService.generationHash(input.password);
 
-        const newUser: WithId<UserAccountDBType> = {
-            _id: new ObjectId(),
-            accountData:{
+        if (!passwordHash) {
+            return {
+                status: ResultStatus.InternalServerError,
+                data: null
+            }
+        }
+        const newUserClass = new UserDB(
+            {
                 userName: input.login,
                 email: input.email,
                 passwordHash: passwordHash,
                 createdAt: new Date().toISOString(),
             },
-            emailConfirmation:{
+            {
                 confirmationCode: '',
                 expirationDate: new Date(),
                 isConfirmed: true
             }
-        }
-        return userMongoRepository.create(newUser);
+        )
 
-    },
+        const userId = await this.usersRepository.save(newUserClass);
+
+        if (!userId) {
+            return {
+                status: ResultStatus.InternalServerError,
+                data: null
+            }
+        }
+
+        const newUser = await this.findForOutput(userId);
+
+        return {
+            status: ResultStatus.Success,
+            data: newUser
+        }
+    }
 
     async checkCredentials(loginOrEmail: string, password: string) {
 
-        const user = await userQueryRepository.findByLoginOrEmail(loginOrEmail)
+        const user = await this.usersQueryRepository.findByLoginOrEmail(loginOrEmail)
 
         if (!user) return false;
         if(!user.emailConfirmation.isConfirmed) return false;
 
         return await bcryptService.checkPassword(password, user.accountData.passwordHash);
-    },
+    }
 
     async find(id: ObjectId) {
 
         return await userCollection.findOne({_id: id});
 
-    },
+    }
 
     async findForOutput(id: ObjectId) {
         const foundUser = await this.find(id);
         if (!foundUser) {
-            return undefined
+            return null
         }
-        return userQueryRepository.mapToOutput(foundUser);
-    },
+        return this.usersQueryRepository.mapToOutput(foundUser);
+    }
 
     async deleteUser(id: ObjectId) {
 
         await userMongoRepository.delete(id);
 
-    },
+    }
 }

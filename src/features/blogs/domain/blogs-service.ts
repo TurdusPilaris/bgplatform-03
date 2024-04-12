@@ -8,15 +8,17 @@ import {ResultStatus} from "../../../common/types/resultCode";
 import {HelperQueryTypeBlog} from "../../../input-output-types/inputTypes";
 import {BlogModel} from "../../../db/mongo/blog/blog.model";
 import {BlogsRepository} from "../repositories/blogsRepository";
-import {postsRepository} from "../../posts/repositories/postsRepository";
 import {PostModel} from "../../../db/mongo/post/post.model";
 import {TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
-import {postQueryRepository} from "../../posts/repositories/postQueryRepository";
+import {PostsQueryRepository} from "../../posts/repositories/postsQueryRepository";
 import {BlogsQueryRepository} from "../repositories/blogQueryRepository";
+import {PostsRepository} from "../../posts/repositories/postsRepository";
 
 export class BlogsService{
     constructor(protected blogsRepository: BlogsRepository,
-                protected blogsQueryRepository: BlogsQueryRepository) {}
+                protected blogsQueryRepository: BlogsQueryRepository,
+                protected postsRepository: PostsRepository,
+                protected postsQueryRepository: PostsQueryRepository) {}
     async create(dto: TypeBlogInputModel): Promise<ResultObject<TypeBlogViewModel | null>> {
 
         const newBlog = new BlogModel(dto);
@@ -73,9 +75,9 @@ export class BlogsService{
         newPost.blogId = blogId;
         newPost.blogName = foundedBlog!.name;
 
-        await postsRepository.save(newPost);
+        await this.postsRepository.save(newPost);
 
-        const updatedPost = await postQueryRepository.findForOutput(newPost._id)
+        const updatedPost = await this.postsQueryRepository.findForOutput(newPost._id)
 
         return {
             status: ResultStatus.Success,

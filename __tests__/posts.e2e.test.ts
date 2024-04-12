@@ -4,7 +4,7 @@ import { db} from "../src/db/mongo/mongo-db";
 import {MongoMemoryServer} from "mongodb-memory-server";
 import {SETTING} from "../src/main/setting";
 import {testSeeder} from "./test.seeder";
-import {postQueryRepository} from "../src/features/posts/repositories/postQueryRepository";
+import {postQueryRepository} from "../src/features/posts/repositories/postsQueryRepository";
 import {ObjectId} from "mongodb";
 
 const CORRECT_ADMIN_AUTH_BASE64 = 'Basic YWRtaW46cXdlcnR5';
