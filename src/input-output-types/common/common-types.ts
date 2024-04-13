@@ -1,7 +1,6 @@
 import {ObjectId} from "mongodb";
 
 export type CustomRateLimitType = {
-    _id: ObjectId;
     IP: string|undefined;
     URL: string;
     date: Date;

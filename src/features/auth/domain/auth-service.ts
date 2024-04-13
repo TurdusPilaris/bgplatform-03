@@ -1,24 +1,32 @@
-import {bcryptService} from "../../../common/adapters/bcrypt-service";
+import {BcryptService} from "../../../common/adapters/bcrypt-service";
 import {UserAccountDBType} from "../../../input-output-types/inputOutputTypesMongo";
-import {userMongoRepository} from "../../users/repositories/usersMongoRepositories";
 import {ObjectId, WithId} from "mongodb";
 import {v4 as uuidv4} from 'uuid';
 import {add} from "date-fns"
-import {userQueryRepository} from "../../users/repositories/userQueryRepository";
+import {UsersQueryRepository} from "../../users/repositories/userQueryRepository";
 import {ResultObject} from "../../../common/types/result.types";
 import {ResultStatus} from "../../../common/types/resultCode";
-import {businessService} from "../../../common/domain/business-service";
-import {jwtService} from "../../../common/adapters/jwt-service";
+import {BusinessService} from "../../../common/domain/business-service";
+import {JWTService} from "../../../common/adapters/jwt-service";
 import {SETTING} from "../../../main/setting";
-import { deviceAuthSessions} from "../../../db/mongo/mongo-db";
 import { PayloadTokenType} from "../../../input-output-types/common/common-types";
 import {NewPasswordRecoveryInputModel} from "../../../input-output-types/auth/inputTypes";
+import {UsersRepository} from "../../users/repositories/usersRepository";
+import {DeviceAuthSessionsModel} from "../../../db/mongo/devicesAuthSessions/deviceAuthSession.model";
 
-export const authService = {
 
+export class AuthService{
+
+    constructor(
+        protected bcryptService: BcryptService,
+        protected businessService: BusinessService,
+        protected jwtService: JWTService,
+        protected usersRepository: UsersRepository,
+        protected usersQueryRepository: UsersQueryRepository
+    ) {}
     async registerUser(login: string, email: string, password: string): Promise<ResultObject> {
 
-        const passwordHash = await bcryptService.generationHash(password);
+        const passwordHash = await this.bcryptService.generationHash(password);
 
         const newUser: WithId<UserAccountDBType> = {
             _id: new ObjectId(),
@@ -40,7 +48,7 @@ export const authService = {
             }
 
         }
-        const createdUser = await userMongoRepository.create(newUser);
+        const createdUser = await this.usersRepository.save(newUser);
 
         if (!createdUser) return {
             status: ResultStatus.BadRequest,
@@ -49,7 +57,7 @@ export const authService = {
             data: null
         }
         try {
-            businessService.sendRegisrtationEmail(email, newUser.emailConfirmation.confirmationCode);
+            this.businessService.sendRegisrtationEmail(email, newUser.emailConfirmation.confirmationCode);
         } catch (e: unknown) {
             console.error('Send email error', e);
         }
@@ -59,10 +67,10 @@ export const authService = {
             data: null
         }
 
-    },
+    }
     async confirmEmail(codeConfirmation: string): Promise<ResultObject> {
 
-        const foundedUser = await userQueryRepository.findByCodeConfirmation(codeConfirmation);
+        const foundedUser = await this.usersQueryRepository.findByCodeConfirmation(codeConfirmation);
         if (!foundedUser) return {
             status: ResultStatus.BadRequest,
             errorField: 'code',
@@ -84,17 +92,17 @@ export const authService = {
             }
         }
 
-        await userMongoRepository.updateConfirmation(foundedUser._id);
+        await this.usersRepository.updateConfirmation(foundedUser._id);
 
         return {
             status: ResultStatus.Success,
             errorMessage: 'Code confirmation is expired',
             data: null
         }
-    },
+    }
     async confirmEmailAndUpdatePassword(input: NewPasswordRecoveryInputModel): Promise<ResultObject> {
 
-        const foundedUser = await userQueryRepository.findByCodeConfirmation(input.recoveryCode);
+        const foundedUser = await this.usersQueryRepository.findByCodeConfirmation(input.recoveryCode);
 
         if (!foundedUser) return {
             status: ResultStatus.BadRequest,
@@ -117,21 +125,21 @@ export const authService = {
             }
         }
 
-        await userMongoRepository.updateConfirmation(foundedUser._id);
+        await this.usersRepository.updateConfirmation(foundedUser._id);
 
-        const passwordHash = await bcryptService.generationHash(input.newPassword);
+        const passwordHash = await this.bcryptService.generationHash(input.newPassword);
 
-        await userMongoRepository.updatePasswordHash(foundedUser._id,passwordHash);
+        await this.usersRepository.updatePasswordHash(foundedUser._id,passwordHash);
 
         return {
             status: ResultStatus.Success,
             errorMessage: 'Code confirmation is expired',
             data: null
         }
-    },
+    }
     async resendingEmail(email: string): Promise<ResultObject> {
 
-        const user = await userQueryRepository.findByLoginOrEmail(email);
+        const user = await this.usersQueryRepository.findByLoginOrEmail(email);
 
         if (!user) return {
             status: ResultStatus.BadRequest,
@@ -147,13 +155,13 @@ export const authService = {
         }
 
         const newConfirmationCode = uuidv4();
-        await userMongoRepository.updateConfirmationCode(user._id, newConfirmationCode, add(new Date(), {
+        await this.usersRepository.updateConfirmationCode(user._id, newConfirmationCode, add(new Date(), {
             hours: 1,
             minutes: 3
         }))
 
         try {
-            businessService.sendRegisrtationEmail(email, newConfirmationCode);
+            this.businessService.sendRegisrtationEmail(email, newConfirmationCode);
         } catch (e: unknown) {
             console.error('Send email error', e);
         }
@@ -162,10 +170,10 @@ export const authService = {
             status: ResultStatus.Success,
             data: null
         }
-    },
+    }
     async recoveryPasswordSendCode(email: string): Promise<ResultObject> {
 
-        const user = await userQueryRepository.findByLoginOrEmail(email);
+        const user = await this.usersQueryRepository.findByLoginOrEmail(email);
 
         if (!user) return {
             status: ResultStatus.Success,
@@ -175,13 +183,13 @@ export const authService = {
         console.log("Hi test this user!", user)
         const newConfirmationCode = uuidv4();
 
-        await userMongoRepository.updateConfirmationCode(user._id, newConfirmationCode, add(new Date(), {
+        await this.usersRepository.updateConfirmationCode(user._id, newConfirmationCode, add(new Date(), {
             hours: 1,
             minutes: 3
         }))
 
         try {
-            await businessService.sendRecoveryPassword(email, newConfirmationCode);
+            await this.businessService.sendRecoveryPassword(email, newConfirmationCode);
         } catch (e: unknown) {
             console.error('Send email error', e);
         }
@@ -190,7 +198,7 @@ export const authService = {
             status: ResultStatus.Success,
             data: null
         }
-    },
+    }
     async checkAccessToken(authHeader: string): Promise<ResultObject<ObjectId | null>> {
 
         const auth = authHeader.split(" ");
@@ -202,7 +210,7 @@ export const authService = {
             data: null
 
         }
-        const payloadAccessToken = await jwtService.verifyAndGetPayloadToken(auth[1], SETTING.JWT_SECRET);
+        const payloadAccessToken = await this.jwtService.verifyAndGetPayloadToken(auth[1], SETTING.JWT_SECRET);
 
         if (!payloadAccessToken) return {
 
@@ -213,7 +221,7 @@ export const authService = {
 
         }
 
-        const user = await userQueryRepository.findForOutput(new ObjectId(payloadAccessToken.userId));
+        const user = await this.usersQueryRepository.findForOutput(new ObjectId(payloadAccessToken.userId));
 
         if (!user) return {
 
@@ -231,12 +239,12 @@ export const authService = {
 
         }
 
-    },
+    }
     async checkRefreshToken(refreshToken: string): Promise<ResultObject<PayloadTokenType | null>> {
 
-        const payloadRefreshToken = await jwtService.verifyAndGetPayloadToken(refreshToken, SETTING.JWT_REFRESH_SECRET);
+        const payloadRefreshToken = await this.jwtService.verifyAndGetPayloadToken(refreshToken, SETTING.JWT_REFRESH_SECRET);
 
-        const fullPayload = await jwtService.decodeToken(refreshToken);
+        const fullPayload = await this.jwtService.decodeToken(refreshToken);
 
         console.log("payloadRefreshToken", fullPayload)
 
@@ -249,7 +257,7 @@ export const authService = {
 
         }
 
-        const user = await userQueryRepository.findForOutput(new ObjectId(payloadRefreshToken.userId))
+        const user = await this.usersQueryRepository.findForOutput(new ObjectId(payloadRefreshToken.userId))
 
         if (!user) {
 
@@ -286,18 +294,18 @@ export const authService = {
 
         }
 
-    },
+    }
 
     async updateToken(refreshToken: string){
 
-        const payloadOldRefreshToken = await jwtService.decodeToken(refreshToken);
+        const payloadOldRefreshToken = await this.jwtService.decodeToken(refreshToken);
         const session = await this.getSession(payloadOldRefreshToken.userId, payloadOldRefreshToken.deviceId!, new Date(payloadOldRefreshToken.iat*1000));
 
         const newDeviceId = uuidv4();
 
         const payLoadRefreshToken: PayloadTokenType = {userId: payloadOldRefreshToken.userId, deviceId: payloadOldRefreshToken.deviceId!};
-        const newRefreshToken = await jwtService.createToken(payLoadRefreshToken, SETTING.AC_REFRESH_TIME, SETTING.JWT_REFRESH_SECRET);
-        const newPayloadRefreshToken = await jwtService.decodeToken(newRefreshToken);
+        const newRefreshToken = await this.jwtService.createToken(payLoadRefreshToken, SETTING.AC_REFRESH_TIME, SETTING.JWT_REFRESH_SECRET);
+        const newPayloadRefreshToken = await this.jwtService.decodeToken(newRefreshToken);
 
         try {
             await this.updateSession(session!._id, new Date(newPayloadRefreshToken.iat*1000), new Date(newPayloadRefreshToken.exp*1000));
@@ -308,20 +316,19 @@ export const authService = {
 
         return newRefreshToken;
 
-    },
+    }
     async getSession(userId: string, deviceId: string, iat: Date){
 
-        return deviceAuthSessions.findOne({userId: userId, deviceId: deviceId, iat: iat});
+        return DeviceAuthSessionsModel.findOne({userId: userId, deviceId: deviceId, iat: iat});
 
-    },
+    }
     async updateSession(_id: ObjectId, iat: Date, exp: Date){
 
-       await deviceAuthSessions.updateOne({_id: _id}, {
-            $set: {
-                iat: iat,
-                exp: exp
-            }
-        })
+        await DeviceAuthSessionsModel.findByIdAndUpdate(_id,
+            {$set: {
+                      iat: iat,
+                      exp: exp
+                  }})
     }
 }
 

@@ -2,15 +2,20 @@ import {Request, Response} from "express";
 import {ParamsType} from "../../../input-output-types/inputTypes";
 import {CommentInputModelType} from "../../../input-output-types/comments/inputTypes";
 import {CommentViewModelType} from "../../../input-output-types/comments/outputTypes";
-import {feedbacksService} from "../domain/feedbacks-service";
+import {FeedbacksService} from "../domain/feedbacks-service";
 import {ResultStatus} from "../../../common/types/resultCode";
-import {commentQueryRepository} from "../reepositories/commentQueryRepository";
 import {ObjectId} from "mongodb";
+import {FeedBacksQueryRepository} from "../reepositories/feedBackQueryRepository";
 
 export class CommentsController {
+    constructor(
+        protected feedbacksService: FeedbacksService,
+        protected feedBacksQueryRepository: FeedBacksQueryRepository,
+    ) {}
+
     async putCommentsController(req: Request<ParamsType, CommentInputModelType, any, any>, res: Response<CommentViewModelType>) {
 
-        const resultObject = await feedbacksService.updateComment(req.params.id, req.body, req.userId!)
+        const resultObject = await this.feedbacksService.updateComment(req.params.id, req.body, req.userId!)
 
         if (resultObject.status === ResultStatus.NotFound) {
             res.sendStatus(404);
@@ -28,7 +33,7 @@ export class CommentsController {
 
     async getCommentsControllerById(req: Request<any, any, any, any>, res: Response) {
 
-        const foundComment = await commentQueryRepository.findForOutput(new ObjectId(req.params.id));
+        const foundComment = await this.feedBacksQueryRepository.findForOutput(new ObjectId(req.params.id));
         if(!foundComment) {
             res.sendStatus(404)
         }
@@ -40,7 +45,7 @@ export class CommentsController {
 
     async deleteCommentsController (req: Request<ParamsType, any, any, any >, res: Response<any>) {
 
-        const resultObject = await feedbacksService.deleteComment(req.params.id, req.userId!);
+        const resultObject = await this.feedbacksService.deleteComment(req.params.id, req.userId!);
 
         if (resultObject.status === ResultStatus.NotFound) {
             res.sendStatus(404);
@@ -55,5 +60,9 @@ export class CommentsController {
             res.sendStatus(204)
         }
 
+    }
+
+    async putLikeStatusForComment(req: Request, res: Response){
+        
     }
 }

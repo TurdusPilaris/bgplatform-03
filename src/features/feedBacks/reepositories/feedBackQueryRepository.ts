@@ -1,12 +1,11 @@
 import {HelperQueryTypeComment} from "../../../input-output-types/inputTypes";
-import {commentCollection} from "../../../db/mongo/mongo-db";
 import {CommentViewModelType, PaginatorCommentsType} from "../../../input-output-types/comments/outputTypes";
 import {ObjectId, WithId} from "mongodb";
 import {CommentDB} from "../../../input-output-types/inputOutputTypesMongo";
 import {CommentDocument, CommentModel} from "../../../db/mongo/comment/comment.model";
 
 export class FeedBacksQueryRepository{
-// export const commentQueryRepository = {
+
 
     async getMany(query: HelperQueryTypeComment, postId: string) {
 

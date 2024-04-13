@@ -1,24 +1,23 @@
 import {UserDB} from "../../../input-output-types/inputOutputTypesMongo";
-import {userCollection} from "../../../db/mongo/mongo-db";
 import {ObjectId} from "mongodb";
 import {UserInputModelType} from "../../../input-output-types/users/inputTypes";
-import {userMongoRepository} from "../repositories/usersMongoRepositories";
-import {bcryptService} from "../../../common/adapters/bcrypt-service";
 import {UsersQueryRepository} from "../repositories/userQueryRepository";
 import {UsersRepository} from "../repositories/usersRepository";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {ResultObject} from "../../../common/types/result.types";
 import {UserViewModelType} from "../../../input-output-types/users/outputTypes";
+import {BcryptService} from "../../../common/adapters/bcrypt-service";
 
 export class UsersService {
     constructor(
         protected usersRepository: UsersRepository,
-        protected usersQueryRepository: UsersQueryRepository
+        protected usersQueryRepository: UsersQueryRepository,
+        protected bcryptService: BcryptService
     ) {}
 
     async create(input: UserInputModelType) :Promise<ResultObject<UserViewModelType|null>> {
 
-        const passwordHash = await bcryptService.generationHash(input.password);
+        const passwordHash = await this.bcryptService.generationHash(input.password);
 
         if (!passwordHash) {
             return {
@@ -49,7 +48,7 @@ export class UsersService {
             }
         }
 
-        const newUser = await this.findForOutput(userId);
+        const newUser = await this.usersQueryRepository.findForOutput(userId);
 
         return {
             status: ResultStatus.Success,
@@ -64,26 +63,12 @@ export class UsersService {
         if (!user) return false;
         if(!user.emailConfirmation.isConfirmed) return false;
 
-        return await bcryptService.checkPassword(password, user.accountData.passwordHash);
-    }
-
-    async find(id: ObjectId) {
-
-        return await userCollection.findOne({_id: id});
-
-    }
-
-    async findForOutput(id: ObjectId) {
-        const foundUser = await this.find(id);
-        if (!foundUser) {
-            return null
-        }
-        return this.usersQueryRepository.mapToOutput(foundUser);
+        return await this.bcryptService.checkPassword(password, user.accountData.passwordHash);
     }
 
     async deleteUser(id: ObjectId) {
 
-        await userMongoRepository.delete(id);
+        await this.usersRepository.delete(id);
 
     }
 }

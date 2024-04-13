@@ -39,16 +39,21 @@ export type InsertedInfoType = {
     "insertedId": ObjectId
 }
 
-// export type CommentDBType = {
-//     content: string;
-//     postId: string;
-//     commentatorInfo: CommentatorInfoType,
-//     createdAt: string
-// }
-
 export type CommentatorInfoType = {
     userId: string,
     userLogin: string
+}
+
+export class DeviceAuthSessionsDB {
+    constructor(
+        public userId: string,
+        public deviceId: string,
+        public iat: Date,
+        public deviceName: string,
+        public ip: string,
+        public exp: Date,
+    ) {
+    }
 }
 
 export class CommentDB {
@@ -67,9 +72,38 @@ export class CommentDB {
 
 export class UserDB {
     _id: ObjectId
+
     constructor(
         public accountData: AccountDataType,
         public emailConfirmation: EmailConfirmationType
+    ) {
+        this._id = new ObjectId()
+    }
+}
+
+export class CustomRateLimitDB{
+    _id: ObjectId
+    constructor(
+       public IP: string,
+       public URL: string,
+       public date: Date
+    ) {
+        this._id = new ObjectId()
+    }
+}
+
+export type LikesForCommentsType = {
+    commentID: string;
+    userID: string,
+    statusLike: Date
+}
+
+export class LikesForCommentsDB{
+    _id: ObjectId
+    constructor(
+        public commentID: string,
+        public userID: string,
+        public statusLike: Date
     ) {
         this._id = new ObjectId()
     }

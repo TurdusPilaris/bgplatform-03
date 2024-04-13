@@ -1,18 +1,22 @@
 import {
     UserAccountDBType,
 } from "../../../input-output-types/inputOutputTypesMongo";
-import {userCollection} from "../../../db/mongo/mongo-db";
 import {ObjectId, WithId} from "mongodb";
 import {UserQueryType} from "../../../input-output-types/inputTypes";
-import {userMongoRepository} from "./usersMongoRepositories";
 import {MeViewModelType, PaginatorUserType, UserViewModelType} from "../../../input-output-types/users/outputTypes";
 import {ResultObject} from "../../../common/types/result.types";
 import {ResultStatus} from "../../../common/types/resultCode";
+import {UserModel} from "../../../db/mongo/user/user.model";
 
 export class UsersQueryRepository{
 
+    async find(id: ObjectId) {
+        return UserModel.findOne({_id: id});
+    }
     async findForOutput(id: ObjectId) {
-        return  await userMongoRepository.findForOutput(id);
+        const foundUser =  await this.find(id);
+        if(!foundUser) {return null}
+        return this.mapToOutput(foundUser);
     }
     mapToOutput(user: WithId<UserAccountDBType>):UserViewModelType {
         return {
@@ -20,7 +24,6 @@ export class UsersQueryRepository{
             login: user.accountData.userName,
             email: user.accountData.email,
             createdAt: user.accountData.createdAt,
-
         }
     }
     async getAllUsers(query:UserQueryType) {
@@ -32,15 +35,15 @@ export class UsersQueryRepository{
             ]
         }
 
-        const items = await userCollection
+        const items = await UserModel
             .find(filterLoginOrEmail)
-            .sort(query.sortBy, query.sortDirection)
+            .sort({[query.sortBy]: query.sortDirection})
             .skip((query.pageNumber -1)*query.pageSize)
             .limit(query.pageSize)
-            .toArray();
+            .lean();
 
         const itemsForPaginator = items.map(this.mapToOutput);
-        const countPosts = await userCollection.countDocuments(filterLoginOrEmail);
+        const countPosts = await UserModel.countDocuments(filterLoginOrEmail);
         const paginatorPost: PaginatorUserType =
             {
                 pagesCount:	Math.ceil(countPosts/query.pageSize),
@@ -50,8 +53,6 @@ export class UsersQueryRepository{
                 items: itemsForPaginator
             };
         return paginatorPost;
-
-
     }
     loginOrEmailFilter(nameUser: string|undefined, email: string|undefined) {
 
@@ -61,7 +62,7 @@ export class UsersQueryRepository{
     }
     async getCountDocumentWithFilter(login:string|undefined, email: string|undefined) {
 
-        return await userCollection.countDocuments(this.loginOrEmailFilter(login, email));
+        return UserModel.countDocuments(this.loginOrEmailFilter(login, email));
 
     }
     async findByLoginOrEmail(loginOrEmail: string) {
@@ -71,14 +72,14 @@ export class UsersQueryRepository{
                 {"accountData.email": { $regex: loginOrEmail ?? '', $options: 'i'}},
             ]
         }
-        return await userCollection.findOne(filterLoginOrEmail);
+        return UserModel.findOne(filterLoginOrEmail);
 
     }
     async findByCodeConfirmation(code: string) {
         const filterCodeConfirmation =
                 {"emailConfirmation.confirmationCode": { $regex: code ?? '', $options: 'i'}}
 
-        return await userCollection.findOne(filterCodeConfirmation);
+        return UserModel.findOne(filterCodeConfirmation);
 
     }
     mapToOutputMe(user: WithId<UserAccountDBType>):MeViewModelType {
@@ -86,7 +87,6 @@ export class UsersQueryRepository{
             login: user.accountData.userName,
             email: user.accountData.email,
             userId: user._id.toString(),
-
         }
     }
     async getAboutMe(userId: string | null):Promise<ResultObject<MeViewModelType|null>> {
@@ -94,7 +94,7 @@ export class UsersQueryRepository{
             status: ResultStatus.NotFound,
             data: null
         }
-        const user = await userCollection.findOne({_id: new ObjectId(userId)})
+        const user = await UserModel.findOne({_id: new ObjectId(userId)})
 
         if(!user) return {
             status: ResultStatus.NotFound,

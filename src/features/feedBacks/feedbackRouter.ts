@@ -3,12 +3,11 @@ import {
     authMiddlewareBearer,
     commentInputValidator, inputValidationMiddleware
 } from "../../middlewares/input-validation-middleware";
-import {CommentsController} from "./controllers/commentsController";
+import {commentsController} from "../../composition-root";
 //
 export const feedbackRouter = Router()
 
-export const commentController = new CommentsController();
-
-feedbackRouter.get("/:id", commentController.getCommentsControllerById)
-feedbackRouter.delete("/:id", authMiddlewareBearer, commentController.deleteCommentsController)
-feedbackRouter.put("/:id", authMiddlewareBearer, commentInputValidator, inputValidationMiddleware, commentController.putCommentsController)
+feedbackRouter.get("/:id", commentsController.getCommentsControllerById.bind(commentsController))
+feedbackRouter.delete("/:id", authMiddlewareBearer, commentsController.deleteCommentsController.bind(commentsController))
+feedbackRouter.put("/:id", authMiddlewareBearer, commentInputValidator, inputValidationMiddleware, commentsController.putCommentsController.bind(commentsController))
+feedbackRouter.put("/:id/like-status", authMiddlewareBearer, commentsController.putLikeStatusForComment.bind(commentsController))

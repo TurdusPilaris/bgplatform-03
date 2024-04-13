@@ -1,15 +1,15 @@
 import {
     BlogDBMongoType, PostDBMongoType,
-    UserAccountDBMongoType
+    UserAccountDBType
 } from "../src/input-output-types/inputOutputTypesMongo";
 import {RegisterUserType} from "./types/typesTests";
-import {ObjectId} from "mongodb";
+import {ObjectId, WithId} from "mongodb";
 import {v4 as uuidv4} from "uuid";
 import {add} from "date-fns";
-import {userCollection} from "../src/db/mongo/mongo-db";
 import {TypeBlogInputModel} from "../src/features/blogs/types/inputTypes";
 import {TypePostInputModelModel} from "../src/input-output-types/posts/inputTypes";
 import {SETTING} from "../src/main/setting";
+import {UserModel} from "../src/db/mongo/user/user.model";
 const CORRECT_ADMIN_AUTH_BASE64 = 'Basic YWRtaW46cXdlcnR5';
 export const testSeeder = {
     createUserDTO() {
@@ -91,7 +91,7 @@ export const testSeeder = {
             content: content || "input.content test 1"
         }
     },
-    createUserMongoDTO(): UserAccountDBMongoType {
+    createUserMongoDTO(): WithId<UserAccountDBType> {
         return {
             _id: new ObjectId(),
             accountData: {
@@ -146,7 +146,7 @@ export const testSeeder = {
             password,
             email
         }: RegisterUserType
-    ): Promise<UserAccountDBMongoType> {
+    ): Promise<WithId<UserAccountDBType>> {
         // @ts-ignore
         const newUser: UserAccountDBMongoType = {
             _id: new ObjectId(),
@@ -167,8 +167,8 @@ export const testSeeder = {
             }
         };
 
-        const res = await userCollection.insertOne({...newUser})
-
+        // const res = await UserModel.insertOne({...newUser})
+        //
         return {
             ...newUser
         }

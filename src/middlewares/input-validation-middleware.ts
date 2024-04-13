@@ -1,11 +1,10 @@
 import {body, param, validationResult} from "express-validator";
 import {NextFunction, Request, Response} from "express";
 import {ObjectId} from "mongodb";
-import {authService} from "../features/auth/domain/auth-service";
 import {ResultStatus} from "../common/types/resultCode";
-import {customRateLimit} from "../db/mongo/mongo-db";
-import {CustomRateLimitType} from "../input-output-types/common/common-types";
-import {blogsRepository, usersQueryRepository} from "../composition-root";
+import {authService, blogsRepository, usersQueryRepository} from "../composition-root";
+import {CustomRateLimitDB} from "../input-output-types/inputOutputTypesMongo";
+import {CustomRateLimitModel} from "../db/mongo/customRateLimit/customRateLimit.model";
 
 export const inputValidationMiddleware = (req:Request, res: Response, next: NextFunction): any => {
 
@@ -187,21 +186,22 @@ export const apiRequestLimitMiddleware = async (req:Request, res: Response, next
 
     const date = new Date(Date.now()-10000)
 
-    const apiInformation: CustomRateLimitType = {
-        _id: new ObjectId(),
-        IP: req.ip,
-        URL: req.originalUrl,
-        date: currentDate
-    }
+    const apiInformation = new CustomRateLimitDB(
+        req.ip!,
+        req.originalUrl,
+        currentDate
+    )
 
-    await customRateLimit.insertOne(apiInformation);
+    let newCustomRateLimit = new CustomRateLimitModel(apiInformation)
+
+    await newCustomRateLimit.save()
 
     const filterCustomRate = {
         IP: req.ip,
         URL: req.originalUrl,
         date: {$gte: date}
     }
-    const countCustomRate = await customRateLimit.countDocuments(filterCustomRate);
+    const countCustomRate = await CustomRateLimitModel.countDocuments(filterCustomRate);
 
     if(countCustomRate > 5) {
         res.sendStatus(429);

@@ -1,10 +1,14 @@
 import {Request, Response} from "express";
-import {testingRepository} from "../repositories/testingRepository";
+import {TestingRepository} from "../repositories/testingRepository";
 
 export class TestingController{
-    deleteAllController(req: Request, res: Response)  {
+    constructor(
+        protected testingRepository: TestingRepository
+    ) {
+    }
+    async deleteAllController(req: Request, res: Response)  {
 
-        testingRepository.deleteAll();
+        await this.testingRepository.deleteAll();
         res.sendStatus(204);
 
     }

@@ -4,14 +4,12 @@ import {
     inputValidationMiddleware,
     userInputValidator
 } from "../../middlewares/input-validation-middleware";
-import {UsersController} from "./controllers/usersController";
+import {usersController} from "../../composition-root";
 
 
 export const usersRouter = Router();
 
-export const usersController = new UsersController();
-
-usersRouter.post('/',authMiddleware, userInputValidator, inputValidationMiddleware, usersController.postUserController);
-usersRouter.get('/', authMiddleware, usersController.getUsersController);
-usersRouter.delete('/:id', authMiddleware, usersController.deleteUsersController);
+usersRouter.post('/',authMiddleware, userInputValidator, inputValidationMiddleware, usersController.postUserController.bind(usersController));
+usersRouter.get('/', authMiddleware, usersController.getUsersController.bind(usersController));
+usersRouter.delete('/:id', authMiddleware, usersController.deleteUsersController.bind(usersController));
 

@@ -13,21 +13,46 @@ import {PostsController} from "./features/posts/controllers/postsController";
 import {UsersService} from "./features/users/domain/users-service";
 import {UsersRepository} from "./features/users/repositories/usersRepository";
 import {UsersController} from "./features/users/controllers/usersController";
+import {AuthService} from "./features/auth/domain/auth-service";
+import {BcryptService} from "./common/adapters/bcrypt-service";
+import {BusinessService} from "./common/domain/business-service";
+import {JWTService} from "./common/adapters/jwt-service";
+import {AuthController} from "./features/auth/controllers/authController";
+import {SecurityService} from "./features/security/domain/security-service";
+import {CommentsController} from "./features/feedBacks/controllers/commentsController";
+import {DevicesController} from "./features/security/controllers/devicesController";
+import {SecurityQueryRepository} from "./features/security/repository/securityQueryRepository";
+import {SecurityRepository} from "./features/security/repository/securityRepository";
+import {TestingController} from "./features/testing/controllers/testingController";
+import {TestingRepository} from "./features/testing/repositories/testingRepository";
 
 export const blogsRepository = new BlogsRepository();
 const blogsQueryRepository = new BlogsQueryRepository();
 const postsQueryRepository = new PostsQueryRepository();
 const postsRepository = new PostsRepository();
 export const usersQueryRepository = new UsersQueryRepository();
-const usersRepository = new UsersRepository();
+export const usersRepository = new UsersRepository();
 
 const feedBacksRepository = new FeedBacksRepository();
 const feedBacksQueryRepository = new FeedBacksQueryRepository();
+const securityQueryRepository = new SecurityQueryRepository()
+const securityRepository = new SecurityRepository();
+const testingRepository = new TestingRepository();
 
-const usersService = new UsersService(usersRepository, usersQueryRepository);
+const bcryptService = new BcryptService();
+const usersService = new UsersService(usersRepository, usersQueryRepository,bcryptService);
 const postsService = new PostsService(postsRepository, postsQueryRepository, blogsRepository, blogsQueryRepository)
 const blogsService = new BlogsService(blogsRepository, blogsQueryRepository, postsRepository, postsQueryRepository);
-const feedBackService = new FeedbacksService(feedBacksRepository, feedBacksQueryRepository, usersQueryRepository, postsRepository);
+const feedBacksService = new FeedbacksService(feedBacksRepository, feedBacksQueryRepository, usersQueryRepository, postsRepository);
+const jwtService = new JWTService();
+const businessService = new BusinessService();
+
+export const authService = new AuthService(bcryptService, businessService, jwtService, usersRepository, usersQueryRepository);
+const securityService = new SecurityService(securityQueryRepository, securityRepository);
 export const blogsController = new BlogsController(blogsService, blogsQueryRepository);
-export const postsController = new PostsController(postsService, feedBackService, feedBacksQueryRepository, postsQueryRepository)
+export const postsController = new PostsController(postsService, feedBacksService, feedBacksQueryRepository, postsQueryRepository)
 export const usersController = new UsersController(usersService, usersQueryRepository)
+export const authController = new AuthController(authService, usersService, jwtService, usersQueryRepository, securityService);
+export const commentsController = new CommentsController(feedBacksService,feedBacksQueryRepository)
+export const testingController = new TestingController(testingRepository);
+export const devicesController = new DevicesController(securityService, securityQueryRepository);

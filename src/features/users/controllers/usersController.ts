@@ -51,7 +51,7 @@ export class UsersController{
         if (!ObjectId.isValid(req.params.id)) {
             res.sendStatus(404);
         }
-        const foundUser = await this.usersService.find(new ObjectId(req.params.id))
+        const foundUser = await this.usersQueryRepository.find(new ObjectId(req.params.id))
         if (!foundUser) {
             res.sendStatus(404);
             return;

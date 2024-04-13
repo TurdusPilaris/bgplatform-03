@@ -1,9 +1,7 @@
 import jwt from 'jsonwebtoken'
-import {ObjectId} from "mongodb";
 import {PayloadTokenType} from "../../input-output-types/common/common-types";
 
-export const jwtService = {
-
+export class JWTService{
     async createToken(payload:PayloadTokenType, expiresTime: string, SECRET_CODE: string) {
 
         return jwt.sign(
@@ -15,7 +13,7 @@ export const jwtService = {
             }
         );
 
-    },
+    }
     async decodeToken(token: string): Promise<any> {
       try {
           return jwt.decode(token);
@@ -23,7 +21,7 @@ export const jwtService = {
           console.error("Cant decode token", e);
           return null;
       }
-    },
+    }
     async verifyAndGetPayloadToken(token: string, secretCode:string):Promise<PayloadTokenType|null> {
 
         try {
