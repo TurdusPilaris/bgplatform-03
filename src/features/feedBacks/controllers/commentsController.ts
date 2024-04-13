@@ -1,11 +1,12 @@
 import {Request, Response} from "express";
 import {ParamsType} from "../../../input-output-types/inputTypes";
-import {CommentInputModelType} from "../../../input-output-types/comments/inputTypes";
-import {CommentViewModelType} from "../../../input-output-types/comments/outputTypes";
+import {CommentInputModelType} from "../../../input-output-types/feedBacks/inputTypes";
+import {CommentViewModelType} from "../../../input-output-types/feedBacks/outputTypes";
 import {FeedbacksService} from "../domain/feedbacks-service";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {ObjectId} from "mongodb";
 import {FeedBacksQueryRepository} from "../reepositories/feedBackQueryRepository";
+import {body} from "express-validator";
 
 export class CommentsController {
     constructor(
@@ -63,6 +64,24 @@ export class CommentsController {
     }
 
     async putLikeStatusForComment(req: Request, res: Response){
-        
+
+        const resultObject =  await this.feedbacksService.updateLikeStatus(req.params.id, req.userId, req.body.likeStatus);
+
+        if(resultObject.status === ResultStatus.NotFound){
+            res.sendStatus(404)
+            return
+        }
+        if(resultObject.status === ResultStatus.Unauthorized){
+            res.sendStatus(401)
+            return
+        }
+        if(resultObject.status === ResultStatus.BadRequest){
+            res.sendStatus(400)
+            return
+        }
+        if(resultObject.status === ResultStatus.Success){
+            res.sendStatus(204)
+            return
+        }
     }
 }

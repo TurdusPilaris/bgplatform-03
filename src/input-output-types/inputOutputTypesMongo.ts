@@ -39,10 +39,7 @@ export type InsertedInfoType = {
     "insertedId": ObjectId
 }
 
-export type CommentatorInfoType = {
-    userId: string,
-    userLogin: string
-}
+
 
 export class DeviceAuthSessionsDB {
     constructor(
@@ -56,19 +53,6 @@ export class DeviceAuthSessionsDB {
     }
 }
 
-export class CommentDB {
-    _id: ObjectId
-    createdAt: string
-
-    constructor(
-        public content: string,
-        public postId: string,
-        public commentatorInfo: CommentatorInfoType
-    ) {
-        this._id = new ObjectId(),
-            this.createdAt = new Date().toISOString()
-    }
-}
 
 export class UserDB {
     _id: ObjectId
@@ -92,19 +76,5 @@ export class CustomRateLimitDB{
     }
 }
 
-export type LikesForCommentsType = {
-    commentID: string;
-    userID: string,
-    statusLike: Date
-}
 
-export class LikesForCommentsDB{
-    _id: ObjectId
-    constructor(
-        public commentID: string,
-        public userID: string,
-        public statusLike: Date
-    ) {
-        this._id = new ObjectId()
-    }
-}
+

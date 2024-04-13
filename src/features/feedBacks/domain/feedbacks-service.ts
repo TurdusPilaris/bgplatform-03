@@ -1,13 +1,13 @@
 import {ObjectId} from "mongodb";
 import {UsersQueryRepository} from "../../users/repositories/userQueryRepository";
-import {CommentInputModelType} from "../../../input-output-types/comments/inputTypes";
-import {PostsRepository, } from "../../posts/repositories/postsRepository";
+import {CommentInputModelType} from "../../../input-output-types/feedBacks/inputTypes";
+import {PostsRepository,} from "../../posts/repositories/postsRepository";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {ResultObject} from "../../../common/types/result.types";
-import {CommentViewModelType} from "../../../input-output-types/comments/outputTypes";
+import {CommentViewModelType} from "../../../input-output-types/feedBacks/outputTypes";
 import {FeedBacksRepository} from "../reepositories/feedBacksRepository";
-import {CommentDB} from "../../../input-output-types/inputOutputTypesMongo";
 import {FeedBacksQueryRepository} from "../reepositories/feedBackQueryRepository";
+import {CommentDB} from "../../../input-output-types/feedBacks/feedBacka.classes";
 
 export class FeedbacksService {
     constructor(
@@ -123,5 +123,41 @@ export class FeedbacksService {
             data: null
         }
 
+    }
+
+    async updateLikeStatus(id: string, userId: string | null, likesStatus: string):Promise<ResultObject<null>> {
+
+        const isValueExistsLikeEnum = Object.values(likesStatus).includes(likesStatus);
+
+        if(isValueExistsLikeEnum){
+            return {
+                status: ResultStatus.BadRequest,
+                data: null
+            }
+        }
+        if(!userId){
+            return {
+                status: ResultStatus.Unauthorized,
+                data: null
+            }
+        }
+
+        const comment = this.feedBacksQueryRepository.findById(new ObjectId(id));
+
+        if(!userId){
+            return {
+                status: ResultStatus.NotFound,
+                data: null
+            }
+        }
+
+        //delete all old likes/dislikes if they to be
+        await this.feedBacksRepository.deleteLikesForUserAndComment(userId, id);
+
+
+        return {
+            status: ResultStatus.Success,
+            data: null
+        }
     }
 }

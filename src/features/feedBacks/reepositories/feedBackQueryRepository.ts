@@ -1,8 +1,9 @@
 import {HelperQueryTypeComment} from "../../../input-output-types/inputTypes";
-import {CommentViewModelType, PaginatorCommentsType} from "../../../input-output-types/comments/outputTypes";
+import {CommentViewModelType, PaginatorCommentsType} from "../../../input-output-types/feedBacks/outputTypes";
 import {ObjectId, WithId} from "mongodb";
-import {CommentDB} from "../../../input-output-types/inputOutputTypesMongo";
 import {CommentDocument, CommentModel} from "../../../db/mongo/comment/comment.model";
+import {LikesForCommentsModel} from "../../../db/mongo/likesForComment/likesForComments.model";
+import {CommentDB} from "../../../input-output-types/feedBacks/feedBacka.classes";
 
 export class FeedBacksQueryRepository{
 
@@ -54,5 +55,14 @@ export class FeedBacksQueryRepository{
             createdAt: comment.createdAt
 
         }
+    }
+
+    async findLikesByUserAndComment(userId: string, id: string) {
+
+        return LikesForCommentsModel.find().
+        where('userID').equals(userId).
+        where('commentID').equals(id).
+        lean();
+
     }
 }

@@ -1,6 +1,7 @@
 import {WithId} from "mongodb";
 import {HydratedDocument, model, Model, Schema} from "mongoose";
-import {CommentDB} from "../../../input-output-types/inputOutputTypesMongo";
+import {CommentDB} from "../../../input-output-types/feedBacks/feedBacka.classes";
+
 
 type CommentModel = Model<WithId<CommentDB>>;
 

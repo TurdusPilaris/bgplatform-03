@@ -6,7 +6,7 @@ import {HelperQueryTypeComment, HelperQueryTypePost, ParamsType} from "../../../
 import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTypes";
 import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 import {ObjectId, SortDirection} from "mongodb";
-import {PaginatorCommentsType} from "../../../input-output-types/comments/outputTypes";
+import {PaginatorCommentsType} from "../../../input-output-types/feedBacks/outputTypes";
 import {FeedBacksQueryRepository} from "../../feedBacks/reepositories/feedBackQueryRepository";
 import {FeedbacksService} from "../../feedBacks/domain/feedbacks-service";
 import {PostsQueryRepository} from "../repositories/postsQueryRepository";

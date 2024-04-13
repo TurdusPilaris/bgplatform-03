@@ -1,5 +1,3 @@
-import {TypePostViewModel} from "../posts/outputTypes";
-
 export type CommentViewModelType = {
     id: string,
     content: string,
