@@ -1,6 +1,6 @@
 import {Router} from "express";
 import {
-    authMiddleware, authMiddlewareBearer, commentInputValidator,
+    authMiddleware, authMiddlewareBearer, commentInputValidator, getUserIdWithoutAuth,
     inputValidationMiddleware,
     postInputValidatorPost
 } from "../../middlewares/input-validation-middleware";
@@ -14,4 +14,4 @@ postsRouter.post('/', authMiddleware, postInputValidatorPost,   inputValidationM
 postsRouter.put('/:id', authMiddleware, postInputValidatorPost, inputValidationMiddleware,  postsController.putPostsController.bind(postsController));
 postsRouter.delete('/:id', authMiddleware, postsController.deletePostsController.bind(postsController));
 postsRouter.post('/:postId/comments', authMiddlewareBearer,commentInputValidator, inputValidationMiddleware, postsController.postCommentsForPostController.bind(postsController));
-postsRouter.get('/:postId/comments', postsController.getCommentForPost.bind(postsController));
+postsRouter.get('/:postId/comments', getUserIdWithoutAuth, postsController.getCommentForPost.bind(postsController));

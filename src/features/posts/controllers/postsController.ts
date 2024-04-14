@@ -115,7 +115,8 @@ export class PostsController {
             res.sendStatus(404)
             return
         }
-        const answer = await this.feedBacksQueryRepository.getMany(helper(req.query), req.params.postId);
+
+        const answer = await this.feedBacksQueryRepository.getMany(helper(req.query), req.params.postId, req.userId);
         res
             .status(200)
             .send(answer);

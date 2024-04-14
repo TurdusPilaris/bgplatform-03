@@ -2,7 +2,21 @@ export type CommentViewModelType = {
     id: string,
     content: string,
     commentatorInfo: CommentatorInfoType,
-    createdAt: string
+    createdAt: string,
+    likesInfo: LikesInfoType|null
+}
+
+export type LikesInfoType = {
+    likesCount: number,
+    dislikesCount: number,
+    myStatus: string
+}
+
+export type LikesInfoCommentIDType = {
+    commentID: string,
+    likesCount: number,
+    dislikesCount: number,
+    myStatus: string
 }
 
 export type CommentatorInfoType = {

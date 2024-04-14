@@ -1,4 +1,3 @@
-import {securityMongoRepository} from "../repository/securityMongoRepository";
 import {ResultObject} from "../../../common/types/result.types";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {ObjectId} from "mongodb";
@@ -69,7 +68,7 @@ export class SecurityService{
         }
 
         try {
-            await securityMongoRepository.deleteSessionByDeviceID(session._id);
+            await this.securityRepository.deleteSessionByDeviceID(session._id);
         } catch (e) {
             return {
                 status: ResultStatus.InternalServerError,
@@ -87,7 +86,7 @@ export class SecurityService{
     }
     async dropCurrentSession(userId: string, currentDeviceId: string) {
 
-        await securityMongoRepository.deleteCurrentSessions(userId, currentDeviceId);
+        await this.securityRepository.deleteCurrentSessions(userId, currentDeviceId);
 
     }
 }

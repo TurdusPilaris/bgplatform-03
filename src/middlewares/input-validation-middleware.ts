@@ -113,6 +113,21 @@ export const authMiddlewareBearer = async (req:Request, res: Response, next: Nex
     return res.sendStatus(401);
 }
 
+export const getUserIdWithoutAuth = async (req:Request, res: Response, next: NextFunction) => {
+
+    if(!req.headers.authorization) {
+
+        return next();
+    }
+    const result = await authService.checkAccessToken(req.headers.authorization);
+
+    if(result.status === ResultStatus.Success){
+        req.userId = result.data!.toString();
+        return next();
+    }
+
+}
+
 export const authMiddlewareRefreshToken = async (req:Request, res: Response, next: NextFunction) => {
 
     if(!req.cookies) {

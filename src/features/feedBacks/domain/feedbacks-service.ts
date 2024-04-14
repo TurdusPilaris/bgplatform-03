@@ -7,7 +7,7 @@ import {ResultObject} from "../../../common/types/result.types";
 import {CommentViewModelType} from "../../../input-output-types/feedBacks/outputTypes";
 import {FeedBacksRepository} from "../reepositories/feedBacksRepository";
 import {FeedBacksQueryRepository} from "../reepositories/feedBackQueryRepository";
-import {CommentDB} from "../../../input-output-types/feedBacks/feedBacka.classes";
+import {CommentDB, LikesForCommentsDB, likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classes";
 
 export class FeedbacksService {
     constructor(
@@ -125,16 +125,18 @@ export class FeedbacksService {
 
     }
 
-    async updateLikeStatus(id: string, userId: string | null, likesStatus: string):Promise<ResultObject<null>> {
+    async updateLikeStatus(id: string, userId: string | null, likesStatusBody: string):Promise<ResultObject<null>> {
 
-        const isValueExistsLikeEnum = Object.values(likesStatus).includes(likesStatus);
+        // @ts-ignore
+        const statusLike = likeStatus[likesStatusBody];
 
-        if(isValueExistsLikeEnum){
+        if(!statusLike){
             return {
                 status: ResultStatus.BadRequest,
                 data: null
             }
         }
+
         if(!userId){
             return {
                 status: ResultStatus.Unauthorized,
@@ -154,10 +156,21 @@ export class FeedbacksService {
         //delete all old likes/dislikes if they to be
         await this.feedBacksRepository.deleteLikesForUserAndComment(userId, id);
 
+        if(statusLike !== likeStatus.None) {
+            let newLike = new LikesForCommentsDB(
+                id,
+                userId,
+                statusLike
+            )
 
-        return {
-            status: ResultStatus.Success,
-            data: null
+            await this.feedBacksRepository.saveLikes(newLike);
+        }
+
+        {
+            return {
+                status: ResultStatus.Success,
+                data: null
+            }
         }
     }
 }

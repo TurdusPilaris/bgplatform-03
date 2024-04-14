@@ -1,7 +1,7 @@
 import {ObjectId} from "mongodb";
 
-const enum likeStatus{
-    Like= 'Like',
+export enum likeStatus{
+    Like = 'Like',
     Dislike = 'Dislike',
     None = 'None'
 }
@@ -25,10 +25,12 @@ export class CommentDB {
 }
 
 export type LikesForCommentsType = {
-    commentID: string;
+    commentID:ObjectId;
     userID: string,
     statusLike: likeStatus
 }
+
+
 export class LikesForCommentsDB{
     _id: ObjectId
     constructor(

@@ -1,8 +1,8 @@
 import {CommentDocument, CommentModel} from "../../../db/mongo/comment/comment.model";
 import {ObjectId} from "mongodb";
 import {CommentInputModelType} from "../../../input-output-types/feedBacks/inputTypes";
-import {CommentDB} from "../../../input-output-types/inputOutputTypesMongo";
 import {LikesForCommentsModel} from "../../../db/mongo/likesForComment/likesForComments.model";
+import {CommentDB, LikesForCommentsDB} from "../../../input-output-types/feedBacks/feedBacka.classes";
 
 export class FeedBacksRepository{
     async saveComment(comment: CommentDB){
@@ -32,5 +32,12 @@ export class FeedBacksRepository{
 
     async deleteLikesForUserAndComment(userID: string, commentID: string) {
         await LikesForCommentsModel.deleteMany({commentID: commentID, userID: userID});
+    }
+
+    async saveLikes(newLike: LikesForCommentsDB) {
+        let newLikes = new LikesForCommentsModel(newLike);
+
+        const result = await newLikes.save();
+        return result._id;
     }
 }

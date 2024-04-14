@@ -34,7 +34,7 @@ export class CommentsController {
 
     async getCommentsControllerById(req: Request<any, any, any, any>, res: Response) {
 
-        const foundComment = await this.feedBacksQueryRepository.findForOutput(new ObjectId(req.params.id));
+        const foundComment = await this.feedBacksQueryRepository.findCommentWithLikesForOutput(new ObjectId(req.params.id), req.userId);
         if(!foundComment) {
             res.sendStatus(404)
         }
