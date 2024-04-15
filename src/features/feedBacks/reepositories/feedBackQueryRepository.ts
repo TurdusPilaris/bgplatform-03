@@ -18,21 +18,19 @@ export class FeedBacksQueryRepository{
 
         const byID = {postId: postId};
 
-        const comments = await CommentModel
-            .find({
-                ...byID,
-            })
-            .sort({[query.sortBy]: query.sortDirection})
-            .skip((query.pageNumber - 1) * query.pageSize)
-            .limit(query.pageSize)
-            .lean();
+        // const comments = await CommentModel
+        //     .find({
+        //         ...byID,
+        //     })
+        //     .sort({[query.sortBy]: query.sortDirection})
+        //     .skip((query.pageNumber - 1) * query.pageSize)
+        //     .limit(query.pageSize)
+        //     .lean();
 
-        const commentsIds = comments.map((comments) => comments._id.toString());
-        const likesForComments = await this.getLikesForComments(postId);
-
-        // console.log("likesForComments ", likesForComments);
-        const itemsForPaginator = comments.map((comment) => this.mapToOutput(comment,null));
-        // const itemsForPaginator = comments.map(el )
+        // const commentsIds = comments.map((comments) => comments._id.toString());
+        const likesForComments = await this.getLikesForComments(postId, userId, query);
+        const itemsForPaginator = likesForComments.map(this.mapToOutputForCommentsWithPost);
+        // const itemsForPaginator = comments.map((comment) => this.mapToOutput(comment,null));
         const countComments = await CommentModel.countDocuments({...byID,});
         const paginatorComments: PaginatorCommentsType =
             {
@@ -107,29 +105,32 @@ export class FeedBacksQueryRepository{
         }
     }
 
+    mapToOutputForCommentsWithPost(comment: any): CommentViewModelType {
+    // mapToOutputForCommentsWithPost(comment: WithId<CommentDB>): CommentViewModelType {
+        return {
+            id: comment._id.toString(),
+            content: comment.content,
+            commentatorInfo: {
+                userId: comment.commentatorInfo.userId,
+                userLogin: comment.commentatorInfo.userLogin,
+            },
+            createdAt: comment.createdAt,
+            likesInfo: {
+                likesCount: comment.likesInfo.countLikes,
+                dislikesCount: comment.likesInfo.countDislikes,
+                myStatus: (comment.likesInfo.myStatus)?comment.likesInfo.myStatus.statusLike: likeStatus.None
+            }
+        }
+    }
+
     async findLikesByUserAndComment(userId: string, id: string) {
 
         return LikesForCommentsModel.find().where('userID').equals(userId).where('commentID').equals(id).lean();
 
     }
 
-    private async getLikesForComments(postId: string) {
+    private async getLikesForComments(postId: string, userID: string|null, query: HelperQueryTypeComment) {
         // const likes = LikesForCommentsModel.find().where('commentId').in(commentsIds)
-        // const likes = await LikesForCommentsModel.aggregate([{
-        //     $group: {
-        //         _id: {
-        //             commentID: "$commentID",
-        //             statusLike: "$statusLike"
-        //         },
-        //         count: {$sum: 1}
-        //     },
-        //     $project: {
-        //         // _id: 0,
-        //         commentID: "$_id.commentID",
-        //         statusLike: "$_id.statusLike",
-        //         count: 1
-        //     }
-        // }])
         // const likes = await LikesForCommentsModel.aggregate([
         //     {
         //         $group: {
@@ -149,6 +150,8 @@ export class FeedBacksQueryRepository{
         //         }
         //     }
         // ]);
+
+
         const likes = await CommentModel.aggregate([
             {$match: {postId:postId}},
             // {$addFields: {id:'$_id'}}
@@ -184,15 +187,26 @@ export class FeedBacksQueryRepository{
                     },
                 },
             },
+            {
+                $addFields: {
+                    'likesInfo.myStatus': {
+                        $first : {
+                            $filter:{
+                                input: '$likesInfo.likes',
+                                cond:  [{$eq:['$$this.userID', userID]},
+                                '$statusLike']
+                            } ,
+                          },
+                    },
+                },
+            },
+
         ])
-        console.log("likes", likes);
+            // @ts-ignore
+            .sort({[query.sortBy]: query.sortDirection})
+            .skip((query.pageNumber - 1) * query.pageSize)
+            .limit(query.pageSize)
+
         return likes;
-        // const likesMap = likes.reduce((acc, like) => {
-        //    acc[like.commentID] = like;
-        //
-        //    return acc
-        // },{} as Record<string, LikesInfoCommentIDType>)
-
-
-    }
+        }
     }
