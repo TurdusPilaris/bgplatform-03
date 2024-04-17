@@ -4,9 +4,11 @@ import {
     inputValidationMiddleware,
     userInputValidator
 } from "../../middlewares/input-validation-middleware";
-import {usersController} from "../../composition-root";
+import {container} from "../../composition-root";
+import {UsersController} from "./controllers/usersController";
 
-
+// const usersController  = ioc.getInstance<UsersController>(UsersController)
+const usersController  = container.resolve(UsersController);
 export const usersRouter = Router();
 
 usersRouter.post('/',authMiddleware, userInputValidator, inputValidationMiddleware, usersController.postUserController.bind(usersController));

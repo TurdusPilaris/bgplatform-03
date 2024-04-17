@@ -8,8 +8,9 @@ import {ObjectId, SortDirection} from "mongodb";
 import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTypes";
 import {PaginatorPostType} from "../../../input-output-types/posts/outputTypes";
 import {BlogsQueryRepository} from "../repositories/blogQueryRepository";
+import {injectable} from "inversify";
 
-
+@injectable()
 export class BlogsController {
     constructor(protected blogsService: BlogsService,
                 protected blogsQueryRepository: BlogsQueryRepository) {}

@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import {Request, Response} from "express";
 import {UserInputModelType} from "../../../input-output-types/users/inputTypes";
 import {UserViewModelType} from "../../../input-output-types/users/outputTypes";
@@ -6,11 +7,12 @@ import {ParamsType, UserQueryType} from "../../../input-output-types/inputTypes"
 import {UsersQueryRepository} from "../repositories/userQueryRepository";
 import {ObjectId} from "mongodb";
 import {ResultStatus} from "../../../common/types/resultCode";
-
+import {inject, injectable} from "inversify";
+@injectable()
 export class UsersController{
     constructor(
-        protected usersService:UsersService,
-        protected usersQueryRepository: UsersQueryRepository) {}
+        @inject(UsersService) protected usersService:UsersService,
+        @inject(UsersQueryRepository) protected usersQueryRepository: UsersQueryRepository) {}
     async postUserController(req: Request<UserInputModelType, any, any, any>, res: Response<UserViewModelType>) {
 
          const resultObject = await this.usersService.create(req.body);

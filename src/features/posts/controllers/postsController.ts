@@ -10,7 +10,8 @@ import {PaginatorCommentsType} from "../../../input-output-types/feedBacks/outpu
 import {FeedBacksQueryRepository} from "../../feedBacks/reepositories/feedBackQueryRepository";
 import {FeedbacksService} from "../../feedBacks/domain/feedbacks-service";
 import {PostsQueryRepository} from "../repositories/postsQueryRepository";
-
+import {injectable} from "inversify";
+@injectable()
 export class PostsController {
     constructor(protected postsService: PostsService,
                 protected feedbackService: FeedbacksService,

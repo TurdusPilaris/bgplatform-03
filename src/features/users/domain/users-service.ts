@@ -7,7 +7,8 @@ import {ResultStatus} from "../../../common/types/resultCode";
 import {ResultObject} from "../../../common/types/result.types";
 import {UserViewModelType} from "../../../input-output-types/users/outputTypes";
 import {BcryptService} from "../../../common/adapters/bcrypt-service";
-
+import {injectable} from "inversify";
+@injectable()
 export class UsersService {
     constructor(
         protected usersRepository: UsersRepository,

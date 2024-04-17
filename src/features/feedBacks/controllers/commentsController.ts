@@ -7,7 +7,8 @@ import {ResultStatus} from "../../../common/types/resultCode";
 import {ObjectId} from "mongodb";
 import {FeedBacksQueryRepository} from "../reepositories/feedBackQueryRepository";
 import {body} from "express-validator";
-
+import {injectable} from "inversify";
+@injectable()
 export class CommentsController {
     constructor(
         protected feedbacksService: FeedbacksService,

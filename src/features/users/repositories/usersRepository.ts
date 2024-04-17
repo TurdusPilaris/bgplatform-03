@@ -1,7 +1,8 @@
 import {UserDB} from "../../../input-output-types/inputOutputTypesMongo";
 import {UserModel} from "../../../db/mongo/user/user.model";
 import {ObjectId} from "mongodb";
-
+import {injectable} from "inversify";
+@injectable()
 export class UsersRepository{
     async save(user: UserDB){
         const newUser = new UserModel(user);

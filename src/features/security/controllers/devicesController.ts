@@ -3,7 +3,8 @@ import {DeviceViewModelType} from "../../../input-output-types/common/common-typ
 import {SecurityQueryRepository} from "../repository/securityQueryRepository";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {SecurityService} from "../domain/security-service";
-
+import {injectable} from "inversify";
+@injectable()
 export  class DevicesController{
     constructor(
         protected securityService: SecurityService,

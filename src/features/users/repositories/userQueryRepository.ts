@@ -7,7 +7,8 @@ import {MeViewModelType, PaginatorUserType, UserViewModelType} from "../../../in
 import {ResultObject} from "../../../common/types/result.types";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {UserModel} from "../../../db/mongo/user/user.model";
-
+import {injectable} from "inversify";
+@injectable()
 export class UsersQueryRepository{
 
     async find(id: ObjectId) {
