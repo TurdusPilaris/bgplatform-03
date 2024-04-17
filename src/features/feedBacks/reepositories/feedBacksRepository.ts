@@ -1,7 +1,10 @@
 import {CommentDocument, CommentModel} from "../../../db/mongo/comment/comment.model";
 import {ObjectId} from "mongodb";
 import {CommentInputModelType} from "../../../input-output-types/feedBacks/inputTypes";
-import {LikesForCommentsModel} from "../../../db/mongo/likesForComment/likesForComments.model";
+import {
+    LikesForCommentsDocument,
+    LikesForCommentsModel
+} from "../../../db/mongo/likesForComment/likesForComments.model";
 import {CommentDB, LikesForCommentsDB} from "../../../input-output-types/feedBacks/feedBacka.classes";
 
 export class FeedBacksRepository{
@@ -12,7 +15,7 @@ export class FeedBacksRepository{
         const result = await newComment.save();
         return result._id;
     }
-    async findById(id: ObjectId): Promise<CommentDocument| null> {
+    async findCommentById(id: ObjectId): Promise<CommentDocument| null> {
         return CommentModel.findOne({_id: id})
     }
     async updateComment(comment: CommentDocument, dto: CommentInputModelType) {
@@ -26,6 +29,9 @@ export class FeedBacksRepository{
         return res.deletedCount === 1
     }
 
+    async findLikesByUserAnPost(commentID: ObjectId, userId: string): Promise<LikesForCommentsDocument| null> {
+        return LikesForCommentsModel.findOne({commentID: commentID, userID: userId})
+    }
     async deleteLike(id: ObjectId) {
         await LikesForCommentsModel.deleteOne({_id: id})
     }
@@ -39,5 +45,12 @@ export class FeedBacksRepository{
 
         const result = await newLikes.save();
         return result._id;
+    }
+
+    async addLikesForComment(comment: CommentDocument, countLikes: number, countDislikes: number) {
+        // comment.content = dto.content;
+        comment.likesInfo.countLikes = comment.likesInfo.countLikes + countLikes;
+        comment.likesInfo.countDislikes = comment.likesInfo.countDislikes + countDislikes;
+        await comment.save();
     }
 }

@@ -14,7 +14,9 @@ export const LikesForCommentsSchema = new mongoose.Schema<WithId<LikesForComment
     statusLike: {
         type: String,
         enum: ['Like', 'Dislike', 'None']
-    }
+    },
+    createdAt: {type: Date},
+    updatedAt: {type: Date},
 })
 
 export const LikesForCommentsModel = model<WithId<LikesForCommentsType>, LikesForCommentsModel>('likesForComments', LikesForCommentsSchema);

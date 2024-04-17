@@ -76,7 +76,8 @@ export class CommentsController {
             return
         }
         if(resultObject.status === ResultStatus.BadRequest){
-            res.sendStatus(400)
+            res.status(400)
+                .send({ errorsMessages: [{ message: resultObject.errorMessage, field: resultObject.errorField }] });
             return
         }
         if(resultObject.status === ResultStatus.Success){

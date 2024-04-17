@@ -14,7 +14,9 @@ export class FeedbacksService {
         protected feedBacksRepository: FeedBacksRepository,
         protected feedBacksQueryRepository: FeedBacksQueryRepository,
         protected usersQueryRepository: UsersQueryRepository,
-        protected postsRepository: PostsRepository) {}
+        protected postsRepository: PostsRepository) {
+    }
+
     async createComment(comment: string, postId: string, userId: string): Promise<ResultObject<CommentViewModelType | null>> {
 
         const post = await this.postsRepository.findById(new ObjectId(postId));
@@ -32,14 +34,8 @@ export class FeedbacksService {
         let newComment = new CommentDB(
             comment,
             postId,
-            {userId:  user!.id, userLogin: user!.login}
+            {userId: user!.id, userLogin: user!.login}
         )
-        // const newComment = new CommentModel();
-        // newComment.content = comment;
-        // newComment.postId = postId;
-        // newComment.commentatorInfo.userId = user!.id;
-        // newComment.commentatorInfo.userLogin = user!.login;
-        // newComment.createdAt = new Date().toISOString();
 
         const createdCommentId = await this.feedBacksRepository.saveComment(newComment);
 
@@ -67,7 +63,7 @@ export class FeedbacksService {
                 data: null
             }
         }
-        const foundedComment = await this.feedBacksRepository.findById(new ObjectId(id))
+        const foundedComment = await this.feedBacksRepository.findCommentById(new ObjectId(id))
 
         if (!foundedComment) {
             return {
@@ -91,6 +87,7 @@ export class FeedbacksService {
         }
 
     }
+
     async updateComment(id: string, dto: CommentInputModelType, userId: string) {
 
         if (!ObjectId.isValid(id)) {
@@ -100,7 +97,7 @@ export class FeedbacksService {
             }
         }
 
-        const foundedComment = await this.feedBacksRepository.findById(new ObjectId(id))
+        const foundedComment = await this.feedBacksRepository.findCommentById(new ObjectId(id))
 
         if (!foundedComment) {
             return {
@@ -125,45 +122,100 @@ export class FeedbacksService {
 
     }
 
-    async updateLikeStatus(id: string, userId: string | null, likesStatusBody: string):Promise<ResultObject<null>> {
+    async updateLikeStatus(id: string, userId: string | null, likesStatusBody: string): Promise<ResultObject<null>> {
 
         // @ts-ignore
-        const statusLike = likeStatus[likesStatusBody];
+        const newStatusLike = likeStatus[likesStatusBody] as likeStatus;
 
-        if(!statusLike){
+        if (!newStatusLike) {
             return {
                 status: ResultStatus.BadRequest,
+                errorField: 'likeStatus',
+                errorMessage: 'Invalid field',
                 data: null
             }
         }
 
-        if(!userId){
+        if (!userId) {
             return {
                 status: ResultStatus.Unauthorized,
                 data: null
             }
         }
 
-        const comment = this.feedBacksQueryRepository.findById(new ObjectId(id));
+        const comment = await this.feedBacksQueryRepository.findCommentById(new ObjectId(id));
 
-        if(!userId){
+        if (!comment) {
             return {
                 status: ResultStatus.NotFound,
                 data: null
             }
         }
 
-        //delete all old likes/dislikes if they to be
-        await this.feedBacksRepository.deleteLikesForUserAndComment(userId, id);
+        const foundedLikes = await this.feedBacksRepository.findLikesByUserAnPost(new ObjectId(id), userId);
 
-        if(statusLike !== likeStatus.None) {
-            let newLike = new LikesForCommentsDB(
-                id,
+        let countLikes = 0;
+        let countDislikes = 0;
+        if (!foundedLikes) {
+
+            const newLike = new LikesForCommentsDB(
+                new ObjectId(id),
                 userId,
-                statusLike
+                newStatusLike,
+                new Date(),
+                new Date(),
             )
-
             await this.feedBacksRepository.saveLikes(newLike);
+
+            if (newStatusLike === likeStatus.Like) {
+                countLikes = 1;
+                countDislikes = 0;
+            }
+            if (newStatusLike === likeStatus.Dislike) {
+                countLikes = 0;
+                countDislikes = 1;
+            }
+            await this.feedBacksRepository.addLikesForComment(comment, countLikes, countDislikes);
+        } else {
+
+            const oldStatus = foundedLikes.statusLike;
+
+            foundedLikes.statusLike = newStatusLike;
+            foundedLikes.updatedAt = new Date();
+
+            await this.feedBacksRepository.saveLikes(foundedLikes);
+
+            if (oldStatus !== newStatusLike) {
+
+                if(oldStatus === likeStatus.None) {
+                    if(newStatusLike === likeStatus.Like){
+                        countLikes = 1;
+                        countDislikes = 0;
+                    }
+                    if(newStatusLike === likeStatus.Dislike){
+                        countLikes = 0;
+                        countDislikes = 1;
+                    }
+                }else if(oldStatus === likeStatus.Like) {
+                    countLikes = -1;
+                    if(newStatusLike === likeStatus.None){
+                        countDislikes = 0;
+                    }
+                    if(newStatusLike === likeStatus.Dislike){
+                        countDislikes = 1;
+                    }
+                }else if(oldStatus === likeStatus.Dislike) {
+                    countDislikes = -1;
+                    if(newStatusLike === likeStatus.None){
+                        countLikes = 0;
+                    }
+                    if(newStatusLike === likeStatus.Like){
+                        countLikes = 1;
+                    }
+                }
+                await this.feedBacksRepository.addLikesForComment(comment, countLikes, countDislikes);
+            }
+
         }
 
         {
