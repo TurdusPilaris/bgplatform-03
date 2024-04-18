@@ -1,8 +1,9 @@
-import {PostDocument, PostModel} from "../../../db/mongo/post/post.model";
+import {PostDocument, PostModel} from "../domain/postModel";
 import {ObjectId} from "mongodb";
 import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTypes";
 import {BlogDocument} from "../../../db/mongo/blog/blog.model";
-
+import {injectable} from "inversify";
+@injectable()
 export class PostsRepository{
 
     async save(post: PostDocument){

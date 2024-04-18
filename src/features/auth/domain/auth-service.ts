@@ -13,8 +13,9 @@ import { PayloadTokenType} from "../../../input-output-types/common/common-types
 import {NewPasswordRecoveryInputModel} from "../../../input-output-types/auth/inputTypes";
 import {UsersRepository} from "../../users/repositories/usersRepository";
 import {DeviceAuthSessionsModel} from "../../../db/mongo/devicesAuthSessions/deviceAuthSession.model";
+import {injectable} from "inversify";
 
-
+@injectable()
 export class AuthService{
 
     constructor(

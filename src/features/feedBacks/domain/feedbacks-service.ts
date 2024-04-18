@@ -7,8 +7,12 @@ import {ResultObject} from "../../../common/types/result.types";
 import {CommentViewModelType} from "../../../input-output-types/feedBacks/outputTypes";
 import {FeedBacksRepository} from "../reepositories/feedBacksRepository";
 import {FeedBacksQueryRepository} from "../reepositories/feedBackQueryRepository";
-import {CommentDB, LikesForCommentsDB, likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classes";
+import {likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classes";
+import {injectable} from "inversify";
+import {CommentDB} from "./commentModel";
+import {LikesModel} from "./likes.entity";
 
+@injectable()
 export class FeedbacksService {
     constructor(
         protected feedBacksRepository: FeedBacksRepository,
@@ -152,70 +156,34 @@ export class FeedbacksService {
             }
         }
 
-        const foundedLikes = await this.feedBacksRepository.findLikesByUserAnPost(new ObjectId(id), userId);
+        const foundedLikes = await this.feedBacksRepository.findLikesByUserAndParent(new ObjectId(id), userId);
 
-        let countLikes = 0;
-        let countDislikes = 0;
+        //проверяем был ли создан лайк
         if (!foundedLikes) {
 
-            const newLike = new LikesForCommentsDB(
-                new ObjectId(id),
-                userId,
-                newStatusLike,
-                new Date(),
-                new Date(),
-            )
+            //если нет, то создаем новый лайк и сохраняем его
+            const newLike = LikesModel.createLike(new ObjectId(id), userId, newStatusLike);
             await this.feedBacksRepository.saveLikes(newLike);
 
-            if (newStatusLike === likeStatus.Like) {
-                countLikes = 1;
-                countDislikes = 0;
-            }
-            if (newStatusLike === likeStatus.Dislike) {
-                countLikes = 0;
-                countDislikes = 1;
-            }
-            await this.feedBacksRepository.addLikesForComment(comment, countLikes, countDislikes);
+            //в комментарий добавляем количество лайков по статусу
+            comment.addCountLikes(newStatusLike);
+            await this.feedBacksRepository.saveComment(comment);
+
+
         } else {
 
-            const oldStatus = foundedLikes.statusLike;
+            //сохранили старый статус лайка для пересчета в комментарии
+            const oldStatusLike = foundedLikes.statusLike;
 
-            foundedLikes.statusLike = newStatusLike;
-            foundedLikes.updatedAt = new Date();
-
+            //установили новый статус лайка и обновили дату изменения лайка
+            foundedLikes.putNewLike(newStatusLike);
             await this.feedBacksRepository.saveLikes(foundedLikes);
 
-            if (oldStatus !== newStatusLike) {
-
-                if(oldStatus === likeStatus.None) {
-                    if(newStatusLike === likeStatus.Like){
-                        countLikes = 1;
-                        countDislikes = 0;
-                    }
-                    if(newStatusLike === likeStatus.Dislike){
-                        countLikes = 0;
-                        countDislikes = 1;
-                    }
-                }else if(oldStatus === likeStatus.Like) {
-                    countLikes = -1;
-                    if(newStatusLike === likeStatus.None){
-                        countDislikes = 0;
-                    }
-                    if(newStatusLike === likeStatus.Dislike){
-                        countDislikes = 1;
-                    }
-                }else if(oldStatus === likeStatus.Dislike) {
-                    countDislikes = -1;
-                    if(newStatusLike === likeStatus.None){
-                        countLikes = 0;
-                    }
-                    if(newStatusLike === likeStatus.Like){
-                        countLikes = 1;
-                    }
-                }
-                await this.feedBacksRepository.addLikesForComment(comment, countLikes, countDislikes);
+            //пересчитаем количество если отличаются новй статус от старого
+            if (oldStatusLike !== newStatusLike) {
+                comment.recountLikes(oldStatusLike, newStatusLike)
+                await this.feedBacksRepository.saveComment(comment);
             }
-
         }
 
         {

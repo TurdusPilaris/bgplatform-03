@@ -1,10 +1,11 @@
-import {PostModel} from "../../../db/mongo/post/post.model";
+import {PostModel} from "../../posts/domain/postModel";
 import {BlogModel} from "../../../db/mongo/blog/blog.model";
 import {UserModel} from "../../../db/mongo/user/user.model";
-import {CommentModel} from "../../../db/mongo/comment/comment.model";
+import {CommentModel} from "../../feedBacks/domain/commentModel";
 import {DeviceAuthSessionsModel} from "../../../db/mongo/devicesAuthSessions/deviceAuthSession.model";
 import {CustomRateLimitModel} from "../../../db/mongo/customRateLimit/customRateLimit.model";
-
+import {injectable} from "inversify";
+@injectable()
 export class TestingRepository{
     async deleteAll() {
         await PostModel.deleteMany({});

@@ -1,7 +1,8 @@
 import {emailAdapter} from "../adapters/email-adapter";
 import {emailRouter} from "../email/email-router";
+import {injectable} from "inversify";
 
-// export const businessService = {
+@injectable()
 export class BusinessService{
    async sendRegisrtationEmail(email: string, confirmationCode: string){
 

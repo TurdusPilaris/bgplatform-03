@@ -142,4 +142,27 @@ export class PostsController {
         }
 
     }
+
+    async putLikeStatusForPost(req: Request, res: Response){
+
+        const resultObject =  await this.postsService.updateLikeStatus(req.params.id, req.userId, req.body.likeStatus);
+
+        if(resultObject.status === ResultStatus.NotFound){
+            res.sendStatus(404)
+            return
+        }
+        if(resultObject.status === ResultStatus.Unauthorized){
+            res.sendStatus(401)
+            return
+        }
+        if(resultObject.status === ResultStatus.BadRequest){
+            res.status(400)
+                .send({ errorsMessages: [{ message: resultObject.errorMessage, field: resultObject.errorField }] });
+            return
+        }
+        if(resultObject.status === ResultStatus.Success){
+            res.sendStatus(204)
+            return
+        }
+    }
 }

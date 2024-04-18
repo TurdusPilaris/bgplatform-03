@@ -8,12 +8,13 @@ import {ResultStatus} from "../../../common/types/resultCode";
 import {HelperQueryTypeBlog} from "../../../input-output-types/inputTypes";
 import {BlogModel} from "../../../db/mongo/blog/blog.model";
 import {BlogsRepository} from "../repositories/blogsRepository";
-import {PostModel} from "../../../db/mongo/post/post.model";
+import {PostModel} from "../../posts/domain/postModel";
 import {TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 import {PostsQueryRepository} from "../../posts/repositories/postsQueryRepository";
 import {BlogsQueryRepository} from "../repositories/blogQueryRepository";
 import {PostsRepository} from "../../posts/repositories/postsRepository";
-
+import {injectable} from "inversify";
+@injectable()
 export class BlogsService{
     constructor(protected blogsRepository: BlogsRepository,
                 protected blogsQueryRepository: BlogsQueryRepository,
@@ -71,7 +72,7 @@ export class BlogsService{
         }
 
         const newPost = new PostModel(dto);
-        newPost.createdAt = new Date().toISOString();
+        newPost.createdAt = new Date();
         newPost.blogId = blogId;
         newPost.blogName = foundedBlog!.name;
 

@@ -1,7 +1,9 @@
 import {Router} from "express";
 import {authMiddlewareRefreshToken} from "../../middlewares/input-validation-middleware";
-import { devicesController } from "../../composition-root";
+import { container } from "../../composition-root";
+import {DevicesController} from "./controllers/devicesController";
 
+const devicesController = container.resolve(DevicesController)
 export const securityRouter = Router();
 
 

@@ -28,47 +28,65 @@ import {TestingController} from "./features/testing/controllers/testingControlle
 import {TestingRepository} from "./features/testing/repositories/testingRepository";
 import {Container} from "inversify";
 
-export const blogsRepository = new BlogsRepository();
-const blogsQueryRepository = new BlogsQueryRepository();
-const postsQueryRepository = new PostsQueryRepository();
-const postsRepository = new PostsRepository();
-export const usersQueryRepository = new UsersQueryRepository();
-export const usersRepository = new UsersRepository();
+ export const blogsRepository = new BlogsRepository();
+// const blogsQueryRepository = new BlogsQueryRepository();
+// const postsQueryRepository = new PostsQueryRepository();
+// const postsRepository = new PostsRepository();
+ export const usersQueryRepository = new UsersQueryRepository();
+ export const usersRepository = new UsersRepository();
 
-const feedBacksRepository = new FeedBacksRepository();
-const feedBacksQueryRepository = new FeedBacksQueryRepository();
-const securityQueryRepository = new SecurityQueryRepository();
-const securityRepository = new SecurityRepository();
-const testingRepository = new TestingRepository();
+// const feedBacksRepository = new FeedBacksRepository();
+// const feedBacksQueryRepository = new FeedBacksQueryRepository();
+// const securityQueryRepository = new SecurityQueryRepository();
+// const securityRepository = new SecurityRepository();
+// const testingRepository = new TestingRepository();
 
-const bcryptService = new BcryptService();
-const usersService = new UsersService(usersRepository, usersQueryRepository,bcryptService);
-const postsService = new PostsService(postsRepository, postsQueryRepository, blogsRepository, blogsQueryRepository)
-const blogsService = new BlogsService(blogsRepository, blogsQueryRepository, postsRepository, postsQueryRepository);
-const feedBacksService = new FeedbacksService(feedBacksRepository, feedBacksQueryRepository, usersQueryRepository, postsRepository);
-const jwtService = new JWTService();
-const businessService = new BusinessService();
+ const bcryptService = new BcryptService();
+// const usersService = new UsersService(usersRepository, usersQueryRepository,bcryptService);
+// const postsService = new PostsService(postsRepository, postsQueryRepository, blogsRepository, blogsQueryRepository)
+// const blogsService = new BlogsService(blogsRepository, blogsQueryRepository, postsRepository, postsQueryRepository);
+// const feedBacksService = new FeedbacksService(feedBacksRepository, feedBacksQueryRepository, usersQueryRepository, postsRepository);
+ const jwtService = new JWTService();
+ const businessService = new BusinessService();
 
-export const authService = new AuthService(bcryptService, businessService, jwtService, usersRepository, usersQueryRepository);
-const securityService = new SecurityService(securityQueryRepository, securityRepository);
-export const blogsController = new BlogsController(blogsService, blogsQueryRepository);
-export const postsController = new PostsController(postsService, feedBacksService, feedBacksQueryRepository, postsQueryRepository)
-// export const usersController = new UsersController(usersService, usersQueryRepository)
-export const authController = new AuthController(authService, usersService, jwtService, usersQueryRepository, securityService);
-export const commentsController = new CommentsController(feedBacksService,feedBacksQueryRepository)
-export const testingController = new TestingController(testingRepository);
-export const devicesController = new DevicesController(securityService, securityQueryRepository);
-
-
-// export const ioc = {
-//     getInstance<T>(ClassType: any){
-//         return objects.find(o => o instanceof  ClassType) as T
-//     }
-// }
+ export const authService = new AuthService(bcryptService, businessService, jwtService, usersRepository, usersQueryRepository);
+// const securityService = new SecurityService(securityQueryRepository, securityRepository);
+// export const blogsController = new BlogsController(blogsService, blogsQueryRepository);
+// export const postsController = new PostsController(postsService, feedBacksService, feedBacksQueryRepository, postsQueryRepository)
+// // export const usersController = new UsersController(usersService, usersQueryRepository)
+// export const authController = new AuthController(authService, usersService, jwtService, usersQueryRepository, securityService);
+// export const commentsController = new CommentsController(feedBacksService,feedBacksQueryRepository)
+// export const testingController = new TestingController(testingRepository);
+// export const devicesController = new DevicesController(securityService, securityQueryRepository);
 
 export const container = new Container();
 container.bind(UsersController).to(UsersController);
-container.bind<UsersService>(UsersService).to(UsersService);
-container.bind<UsersRepository>(UsersRepository).to(UsersRepository);
-container.bind<UsersQueryRepository>(UsersQueryRepository).to(UsersQueryRepository);
+container.bind(UsersService).to(UsersService);
+container.bind(UsersRepository).to(UsersRepository);
+container.bind(UsersQueryRepository).to(UsersQueryRepository);
+
+container.bind(BlogsRepository).to(BlogsRepository);
+container.bind(BlogsQueryRepository).to(BlogsQueryRepository);
+container.bind(PostsQueryRepository).to(PostsQueryRepository);
+container.bind(PostsRepository).to(PostsRepository);
+container.bind(FeedBacksRepository).to(FeedBacksRepository);
+container.bind(FeedBacksQueryRepository).to(FeedBacksQueryRepository);
+container.bind(SecurityQueryRepository).to(SecurityQueryRepository);
+container.bind(SecurityRepository).to(SecurityRepository);
+container.bind(TestingRepository).to(TestingRepository);
+container.bind(BcryptService).to(BcryptService);
+container.bind(PostsService).to(PostsService);
+container.bind(BlogsService).to(BlogsService);
+container.bind(FeedbacksService).to(FeedbacksService);
+container.bind(JWTService).to(JWTService);
+container.bind(BusinessService).to(BusinessService);
+container.bind(AuthService).to(AuthService);
+container.bind(SecurityService).to(SecurityService);
+container.bind(BlogsController).to(BlogsController);
+container.bind(PostsController).to(PostsController);
+container.bind(AuthController).to(AuthController);
+container.bind(CommentsController).to(CommentsController);
+container.bind(TestingController).to(TestingController);
+container.bind(DevicesController).to(DevicesController);
+
 

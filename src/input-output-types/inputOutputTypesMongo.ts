@@ -1,4 +1,5 @@
 import {ObjectId} from "mongodb";
+import {LikesInfoType, likeStatus} from "./feedBacks/feedBacka.classes";
 
 export type PostDBMongoType = {
     title: string;
@@ -7,6 +8,28 @@ export type PostDBMongoType = {
     blogId: string | undefined;
     blogName: string | undefined;
     createdAt: string;
+}
+
+export class PostDBType {
+    _id: ObjectId
+    createdAt: Date
+    likesInfo: LikesInfoType
+
+    constructor(
+        public title: string,
+        public shortDescription: string,
+        public content: string,
+        public blogId: string | undefined,
+        public blogName: string | undefined,
+    ) {
+        this._id = new ObjectId(),
+            this.createdAt = new Date(),
+            this.likesInfo = {
+                countLikes: 0,
+                countDislikes: 0,
+                myStatus: likeStatus.None
+            }
+    }
 }
 
 export type UserAccountDBType = {
@@ -40,7 +63,6 @@ export type InsertedInfoType = {
 }
 
 
-
 export class DeviceAuthSessionsDB {
     constructor(
         public userId: string,
@@ -65,12 +87,13 @@ export class UserDB {
     }
 }
 
-export class CustomRateLimitDB{
+export class CustomRateLimitDB {
     _id: ObjectId
+
     constructor(
-       public IP: string,
-       public URL: string,
-       public date: Date
+        public IP: string,
+        public URL: string,
+        public date: Date
     ) {
         this._id = new ObjectId()
     }

@@ -8,8 +8,9 @@ import {
 import {CustomRateLimitType, DeviceAuthSessionsType} from "../../input-output-types/common/common-types";
 import mongoose from "mongoose";
 import {BlogModel} from "./blog/blog.model";
-import {PostModel} from "./post/post.model";
-import {CommentDB} from "../../input-output-types/feedBacks/feedBacka.classes";
+import {PostModel} from "../../features/posts/domain/postModel";
+import {CommentDB} from "../../features/feedBacks/domain/commentModel";
+
 // const MONGO_URL="mongodb+srv://drozdovaElena:WIMUTynaAxzPoowP@cluster0.qxhqyca.mongodb.net/?retryWrites=true&w=majority"
 
 console.log("MONGO URL" + SETTING.MONGO_URL)

@@ -5,13 +5,14 @@ import {
     PaginatorCommentsType
 } from "../../../input-output-types/feedBacks/outputTypes";
 import {ObjectId, WithId} from "mongodb";
-import {CommentDocument, CommentModel} from "../../../db/mongo/comment/comment.model";
+import {CommentDB, CommentDocument, CommentModel} from "../domain/commentModel";
 import {
     LikesForCommentsDocument,
     LikesForCommentsModel
-} from "../../../db/mongo/likesForComment/likesForComments.model";
-import {CommentDB, LikesForCommentsType, likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classes";
-
+} from "../domain/likesForComments.entity";
+import {LikesType, likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classes";
+import {injectable} from "inversify";
+@injectable()
 export class FeedBacksQueryRepository {
 
     async getMany(query: HelperQueryTypeComment, postId: string, userId: string | null) {
@@ -196,7 +197,7 @@ export class FeedBacksQueryRepository {
 
             acc[likecommentID] = like
             return acc
-        }, {} as Record<string, WithId<LikesForCommentsType>>)
+        }, {} as Record<string, WithId<LikesType>>)
 
         return likesWithKeys;
     }

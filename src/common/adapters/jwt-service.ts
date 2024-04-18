@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import {PayloadTokenType} from "../../input-output-types/common/common-types";
-
+import {injectable} from "inversify";
+@injectable()
 export class JWTService{
     async createToken(payload:PayloadTokenType, expiresTime: string, SECRET_CODE: string) {
 

@@ -4,8 +4,9 @@ import {
 import {ObjectId, WithId} from "mongodb";
 import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 import {HelperQueryTypePost} from "../../../input-output-types/inputTypes";
-import {PostDocument, PostModel} from "../../../db/mongo/post/post.model";
-
+import {PostDBType, PostDocument, PostModel} from "../domain/postModel";
+import {injectable} from "inversify";
+@injectable()
 export class PostsQueryRepository {
 
     async findById(id: ObjectId): Promise<PostDocument| null> {
@@ -17,7 +18,7 @@ export class PostsQueryRepository {
         if(!foundPost) {return null}
         return this.mapToOutput(foundPost);
     }
-    mapToOutput(post: WithId<PostDBMongoType>):TypePostViewModel {
+    mapToOutput(post: PostDBType):TypePostViewModel {
         return {
             id: post._id.toString(),
             title: post.title,
@@ -25,7 +26,7 @@ export class PostsQueryRepository {
             content: post.content||'',
             blogId: post.blogId||'',
             blogName: post.blogName||'',
-            createdAt: post.createdAt||'',
+            createdAt: post.createdAt.toISOString()||'',
 
         }
     }

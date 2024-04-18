@@ -1,5 +1,5 @@
 import {UserDB} from "../../../input-output-types/inputOutputTypesMongo";
-import {UserModel} from "../../../db/mongo/user/user.model";
+import {UserDocument, UserModel} from "../../../db/mongo/user/user.model";
 import {ObjectId} from "mongodb";
 import {injectable} from "inversify";
 @injectable()
@@ -34,4 +34,8 @@ export class UsersRepository{
                 "accountData.passwordHash": passwordHash
             }
         })
-    }}
+    }
+    async findByID(id: ObjectId):Promise<UserDocument> {
+        return UserModel.findOne({_id: id});
+    }
+}

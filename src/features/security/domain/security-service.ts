@@ -4,7 +4,8 @@ import {ObjectId} from "mongodb";
 import {SecurityQueryRepository} from "../repository/securityQueryRepository";
 import {DeviceAuthSessionsDB} from "../../../input-output-types/inputOutputTypesMongo";
 import {SecurityRepository} from "../repository/securityRepository";
-
+import {injectable} from "inversify";
+@injectable()
 export class SecurityService{
 
     constructor(

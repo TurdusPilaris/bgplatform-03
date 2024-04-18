@@ -8,7 +8,10 @@ import {
     postInputValidatorPostWithoutBlogID,
 } from "../../middlewares/input-validation-middleware";
 
-import {blogsController} from "../../composition-root";
+import {container} from "../../composition-root";
+import {BlogsController} from "./controllers/blogsController";
+
+const blogsController = container.resolve(BlogsController)
 export const blogsRouter = Router();
 
 blogsRouter.get('/', blogsController.getBlogsController.bind(blogsController));

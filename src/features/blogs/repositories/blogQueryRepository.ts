@@ -6,9 +6,10 @@ import {PaginatorBlogType, TypeBlogViewModel} from "../types/outputTypes";
 import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 import {HelperQueryTypeBlog, HelperQueryTypePost} from "../../../input-output-types/inputTypes";
 import {BlogDocument, BlogModel} from "../../../db/mongo/blog/blog.model";
-import {PostModel} from "../../../db/mongo/post/post.model";
+import {PostDBType, PostModel} from "../../posts/domain/postModel";
+import {injectable} from "inversify";
 
-
+@injectable()
 export class BlogsQueryRepository{
 
     async findById(id: ObjectId): Promise<BlogDocument| null> {
@@ -57,7 +58,7 @@ export class BlogsQueryRepository{
             isMembership: false
         }
     }
-    mapToOutputForPosts(post: WithId<PostDBMongoType>):TypePostViewModel {
+    mapToOutputForPosts(post: PostDBType):TypePostViewModel {
         return {
             id: post._id.toString(),
             title: post.title,
@@ -65,7 +66,7 @@ export class BlogsQueryRepository{
             content: post.content||'',
             blogId: post.blogId||'',
             blogName: post.blogName||'',
-            createdAt: post.createdAt||'',
+            createdAt: post.createdAt.toISOString()||'',
 
         }
     }

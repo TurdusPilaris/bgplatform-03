@@ -1,8 +1,9 @@
 import {ObjectId} from "mongodb";
 import {BlogDocument, BlogModel} from "../../../db/mongo/blog/blog.model";
 import {TypeBlogInputModel} from "../types/inputTypes";
+import {injectable} from "inversify";
 
-
+@injectable()
 export class BlogsRepository{
     async findById(id: ObjectId): Promise<BlogDocument| null> {
         return BlogModel.findOne({_id: id})

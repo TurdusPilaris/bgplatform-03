@@ -3,8 +3,10 @@ import {
     authMiddlewareBearer,
     commentInputValidator, getUserIdWithoutAuth, inputValidationMiddleware
 } from "../../middlewares/input-validation-middleware";
-import {commentsController} from "../../composition-root";
+import {container} from "../../composition-root";
+import {CommentsController} from "./controllers/commentsController";
 //
+const commentsController = container.resolve(CommentsController)
 export const feedbackRouter = Router()
 
 feedbackRouter.get("/:id", getUserIdWithoutAuth, commentsController.getCommentsControllerById.bind(commentsController))

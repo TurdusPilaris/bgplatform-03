@@ -1,7 +1,8 @@
 import {WithId} from "mongodb";
 import {DeviceAuthSessionsType, DeviceViewModelType} from "../../../input-output-types/common/common-types";
 import {DeviceAuthSessionsModel} from "../../../db/mongo/devicesAuthSessions/deviceAuthSession.model";
-
+import {injectable} from "inversify";
+@injectable()
 export class SecurityQueryRepository {
 
     async getAllSessionsForUser(userId: string): Promise<DeviceViewModelType[]> {

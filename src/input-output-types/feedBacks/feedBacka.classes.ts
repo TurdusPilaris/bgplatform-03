@@ -16,25 +16,7 @@ export type LikesInfoType = {
     myStatus: likeStatus.None
 }
 
-export class CommentDB {
-    _id: ObjectId
-    createdAt: Date
-    likesInfo: LikesInfoType
-    constructor(
-        public content: string,
-        public postId: string,
-        public commentatorInfo: CommentatorInfoType
 
-    ) {
-        this._id = new ObjectId(),
-        this.createdAt = new Date(),
-            this.likesInfo = {
-            countLikes: 0,
-            countDislikes: 0,
-            myStatus: likeStatus.None
-            }
-    }
-}
 
 export class LikesForCommentsDB {
 
@@ -52,8 +34,8 @@ export class LikesForCommentsDB {
 
 }
 
-export type LikesForCommentsType = {
-    commentID: ObjectId;
+export type LikesType = {
+    parentID: ObjectId;
     userID: string,
     statusLike: likeStatus,
     createdAt: Date,

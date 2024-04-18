@@ -17,7 +17,8 @@ import {UsersService} from "../../users/domain/users-service";
 import {UsersQueryRepository} from "../../users/repositories/userQueryRepository";
 import {v4 as uuidv4} from "uuid";
 import {MeViewModelType} from "../../../input-output-types/users/outputTypes";
-
+import {injectable} from "inversify";
+@injectable()
 export class AuthController{
 
     constructor(

@@ -3,14 +3,18 @@ import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTy
 import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 
 import {BlogsQueryRepository} from "../../blogs/repositories/blogQueryRepository";
-import {PostModel} from "../../../db/mongo/post/post.model";
+import {PostModel} from "./postModel";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {ResultObject} from "../../../common/types/result.types";
 import {PostsQueryRepository} from "../repositories/postsQueryRepository";
 import {HelperQueryTypePost} from "../../../input-output-types/inputTypes";
 import {PostsRepository} from "../repositories/postsRepository";
 import {BlogsRepository} from "../../blogs/repositories/blogsRepository";
-
+import {injectable} from "inversify";
+import {likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classes";
+import {LikesForCommentsModel} from "../../feedBacks/domain/likesForComments.entity";
+import {LikesForPostsModel} from "../../feedBacks/domain/likesForPostsModel";
+@injectable()
 export class PostsService{
 
     constructor(
@@ -24,7 +28,7 @@ export class PostsService{
         const foundedBlog = await this.blogsQueryRepository.findForOutput(new ObjectId(dto.blogId));
 
         const newPost = new PostModel(dto);
-        newPost.createdAt = new Date().toISOString();
+        newPost.createdAt = new Date();
         newPost.blogName = foundedBlog!.name;
 
         const createdPostID = await this.postsRepository.save(newPost);
@@ -124,5 +128,71 @@ export class PostsService{
         }
     }
 
+    async updateLikeStatus(id: string, userId: string | null, likesStatusBody: string): Promise<ResultObject<null>> {
+
+        // @ts-ignore
+        const newStatusLike = likeStatus[likesStatusBody] as likeStatus;
+
+        if (!newStatusLike) {
+            return {
+                status: ResultStatus.BadRequest,
+                errorField: 'likeStatus',
+                errorMessage: 'Invalid field',
+                data: null
+            }
+        }
+
+        if (!userId) {
+            return {
+                status: ResultStatus.Unauthorized,
+                data: null
+            }
+        }
+
+        const post = await this.postsRepository.findById(new ObjectId(id));
+
+        if (!post) {
+            return {
+                status: ResultStatus.NotFound,
+                data: null
+            }
+        }
+
+        const foundedLikes = await this.feedBacksRepository.findLikesByUserAndParent(new ObjectId(id), userId);
+
+        //проверяем был ли создан лайк
+        if (!foundedLikes) {
+
+            //если нет, то создаем новый лайк и сохраняем его
+            const newLike = LikesModel.createLike(new ObjectId(id), userId, newStatusLike);
+            await this.feedBacksRepository.saveLikes(newLike);
+
+            //в пост добавляем количество лайков по статусу
+            post.addCountLikes(newStatusLike);
+            await this.postsRepository.save(post);
+
+
+        } else {
+            //сохранили старый статус лайка для пересчета в комментарии
+            const oldStatusLike = foundedLikes.statusLike;
+
+            //установили новый статус лайка и обновили дату изменения лайка
+            foundedLikes.putNewLike(newStatusLike);
+            await this.feedBacksRepository.saveLikes(foundedLikes);
+
+            //пересчитаем количество если отличаются новй статус от старого
+            if (oldStatusLike !== newStatusLike) {
+                comment.recountLikes(oldStatusLike, newStatusLike)
+                await this.feedBacksRepository.saveComment(comment);
+            }
+        }
+
+        {
+            return {
+                status: ResultStatus.Success,
+                data: null
+            }
+        }
+    }
 }
 
