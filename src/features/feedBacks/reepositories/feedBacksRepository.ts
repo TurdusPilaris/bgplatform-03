@@ -1,12 +1,9 @@
 import {CommentDB, CommentDocument, CommentModel} from "../domain/commentModel";
 import {ObjectId} from "mongodb";
 import {CommentInputModelType} from "../../../input-output-types/feedBacks/inputTypes";
-import {
-    LikesForCommentsDocument,
-    LikesForCommentsModel
-} from "../domain/likesForComments.entity";
 import {injectable} from "inversify";
-import {LikesForPostsDocument, LikesForPostsModel} from "../domain/likesForPostsModel";
+
+import {LikesDocument, LikesModel} from "../domain/likes.entity";
 
 @injectable()
 export class FeedBacksRepository {

@@ -35,7 +35,7 @@ export class UsersRepository{
             }
         })
     }
-    async findByID(id: ObjectId):Promise<UserDocument> {
+    async findByID(id: ObjectId) {
         return UserModel.findOne({_id: id});
     }
 }

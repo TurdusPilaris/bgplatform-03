@@ -22,32 +22,32 @@ export class BlogsQueryRepository{
         }
         return this.mapToOutput(foundBlog as WithId<BlogDBMongoType>);
     }
-    async getMany(query:HelperQueryTypePost, blogId: string)  {
-
-        const byID = {blogId: blogId};
-
-        const items = await PostModel
-            .find({
-                  ...byID,
-                   // ...search
-            })
-            .sort({[query.sortBy]: query.sortDirection})
-            .skip((query.pageNumber -1)*query.pageSize)
-            .limit(query.pageSize)
-            .lean();
-
-        const itemsForPaginator = items.map(this.mapToOutputForPosts);
-        const countPosts = await PostModel.countDocuments({...byID,});
-        const paginatorPost: PaginatorPostType =
-         {
-            pagesCount:	Math.ceil(countPosts/query.pageSize),
-            page:	query.pageNumber,
-            pageSize:	query.pageSize,
-            totalCount: countPosts,
-            items: itemsForPaginator
-        };
-        return paginatorPost;
-    }
+    // async getMany(query:HelperQueryTypePost, blogId: string)  {
+    //
+    //     const byID = {blogId: blogId};
+    //
+    //     const items = await PostModel
+    //         .find({
+    //               ...byID,
+    //                // ...search
+    //         })
+    //         .sort({[query.sortBy]: query.sortDirection})
+    //         .skip((query.pageNumber -1)*query.pageSize)
+    //         .limit(query.pageSize)
+    //         .lean();
+    //
+    //     const itemsForPaginator = items.map(this.mapToOutputForPosts);
+    //     const countPosts = await PostModel.countDocuments({...byID,});
+    //     const paginatorPost: PaginatorPostType =
+    //      {
+    //         pagesCount:	Math.ceil(countPosts/query.pageSize),
+    //         page:	query.pageNumber,
+    //         pageSize:	query.pageSize,
+    //         totalCount: countPosts,
+    //         items: itemsForPaginator
+    //     };
+    //     return paginatorPost;
+    // }
     mapToOutput(blog: WithId<BlogDBMongoType>): TypeBlogViewModel {
         return {
             id: blog._id.toString(),
@@ -58,18 +58,18 @@ export class BlogsQueryRepository{
             isMembership: false
         }
     }
-    mapToOutputForPosts(post: PostDBType):TypePostViewModel {
-        return {
-            id: post._id.toString(),
-            title: post.title,
-            shortDescription: post.shortDescription||'',
-            content: post.content||'',
-            blogId: post.blogId||'',
-            blogName: post.blogName||'',
-            createdAt: post.createdAt.toISOString()||'',
-
-        }
-    }
+    // mapToOutputForPosts(post: PostDBType):TypePostViewModel {
+    //     return {
+    //         id: post._id.toString(),
+    //         title: post.title,
+    //         shortDescription: post.shortDescription||'',
+    //         content: post.content||'',
+    //         blogId: post.blogId||'',
+    //         blogName: post.blogName||'',
+    //         createdAt: post.createdAt.toISOString()||'',
+    //
+    //     }
+    // }
     async getAllBlogs(query:HelperQueryTypeBlog) {
 
         const search = query.searchNameTerm? {name:{$regex: query.searchNameTerm, $options: 'i'}}: {}

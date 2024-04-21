@@ -1,17 +1,13 @@
 import {HelperQueryTypeComment} from "../../../input-output-types/inputTypes";
 import {
-    CommentViewModelType, LikesInfoCommentIDType,
-    LikesInfoType,
+    CommentViewModelType,
     PaginatorCommentsType
 } from "../../../input-output-types/feedBacks/outputTypes";
 import {ObjectId, WithId} from "mongodb";
 import {CommentDB, CommentDocument, CommentModel} from "../domain/commentModel";
-import {
-    LikesForCommentsDocument,
-    LikesForCommentsModel
-} from "../domain/likesForComments.entity";
 import {LikesType, likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classes";
 import {injectable} from "inversify";
+import {LikesModel} from "../domain/likes.entity";
 @injectable()
 export class FeedBacksQueryRepository {
 
@@ -59,14 +55,14 @@ export class FeedBacksQueryRepository {
 
     }
 
-    async getLikesInfo(commentId: string, userId: string | null): Promise<likeStatus> {
+    async getLikesInfo(parentId: string, userId: string | null): Promise<likeStatus> {
 
         if (userId) {
-            const myLikeForComment = await LikesForCommentsModel.findOne({commentID: commentId, userID: userId}).lean();
-            if (!myLikeForComment) {
+            const myLike = await LikesModel.findOne({parentID: parentId, userID: userId}).lean();
+            if (!myLike) {
                 return likeStatus.None
             } else {
-                return myLikeForComment.statusLike
+                return myLike.statusLike
             }
         } else {
             return likeStatus.None
@@ -186,14 +182,14 @@ export class FeedBacksQueryRepository {
         // return likes;
     }
 
-    private async getLikesByUser(commentsIds: any, userId: string | null) {
+    async getLikesByUser(commentsIds: any, userId: string | null) {
 
         // if(!userId) return []
-        const likes = await LikesForCommentsModel.find().where('commentID').in(commentsIds).where('userID').equals(userId).lean();
+        const likes = await LikesModel.find().where('parentID').in(commentsIds).where('userID').equals(userId).lean();
 
         const likesWithKeys = likes.reduce((acc, like) => {
 
-            const likecommentID = like.commentID.toString();
+            const likecommentID = like.parentID.toString();
 
             acc[likecommentID] = like
             return acc

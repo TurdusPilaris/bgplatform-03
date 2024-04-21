@@ -12,8 +12,10 @@ import {PostsRepository} from "../repositories/postsRepository";
 import {BlogsRepository} from "../../blogs/repositories/blogsRepository";
 import {injectable} from "inversify";
 import {likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classes";
-import {LikesForCommentsModel} from "../../feedBacks/domain/likesForComments.entity";
-import {LikesForPostsModel} from "../../feedBacks/domain/likesForPostsModel";
+import {FeedBacksRepository} from "../../feedBacks/reepositories/feedBacksRepository";
+import {LikesModel} from "../../feedBacks/domain/likes.entity";
+import {usersRepository} from "../../../composition-root";
+
 @injectable()
 export class PostsService{
 
@@ -21,15 +23,19 @@ export class PostsService{
         protected postsRepository: PostsRepository,
         protected postsQueryRepository: PostsQueryRepository,
         protected blogsRepository: BlogsRepository,
-        protected blogsQueryRepository: BlogsQueryRepository
+        protected blogsQueryRepository: BlogsQueryRepository,
+        protected feedBacksRepository: FeedBacksRepository
         ) {}
-    async create(dto: TypePostInputModelModel): Promise<ResultObject<TypePostViewModel | null>> {
+    async create(dto: TypePostInputModelModel, userId: string|null): Promise<ResultObject<TypePostViewModel | null>> {
 
         const foundedBlog = await this.blogsQueryRepository.findForOutput(new ObjectId(dto.blogId));
 
         const newPost = new PostModel(dto);
         newPost.createdAt = new Date();
         newPost.blogName = foundedBlog!.name;
+        newPost.likesInfo.countLikes = 0;
+        newPost.likesInfo.countDislikes = 0;
+        newPost.likesInfo.myStatus = likeStatus.None;
 
         const createdPostID = await this.postsRepository.save(newPost);
 
@@ -40,7 +46,7 @@ export class PostsService{
             }
         }
 
-        const createdPost = await this.postsQueryRepository.findForOutput(new ObjectId(createdPostID));
+        const createdPost = await this.postsQueryRepository.findForOutput(new ObjectId(createdPostID), userId);
 
         if (!createdPost) {
             return {
@@ -68,7 +74,7 @@ export class PostsService{
             }
         }
 
-        const foundPost = await this.postsQueryRepository.findForOutput(new ObjectId(id));
+        const foundPost = await this.postsRepository.findById(new ObjectId(id));
 
         if (!foundPost) {
             return {
@@ -91,7 +97,7 @@ export class PostsService{
             data: null
         }
     }
-    async updatePost(id: string, dto: TypePostInputModelModel): Promise<ResultObject<TypePostViewModel | null>> {
+    async updatePost(id: string, dto: TypePostInputModelModel, userId: string|null): Promise<ResultObject<TypePostViewModel | null>> {
 
         if (!ObjectId.isValid(id)) {
             return {
@@ -111,16 +117,17 @@ export class PostsService{
         const blogForPost = await this.blogsRepository.findById(new ObjectId(dto.blogId))
         await this.postsRepository.updatePost(foundedPost, dto, blogForPost);
 
-        const updatedPost = await this.postsQueryRepository.findForOutput(foundedPost._id)
+        const updatedPost = await this.postsQueryRepository.findForOutput(foundedPost._id, userId)
 
         return {
             status: ResultStatus.Success,
             data: updatedPost
         }
     }
-    async getAllPosts(query: HelperQueryTypePost): Promise<ResultObject<PaginatorPostType>> {
+    async getAllPosts(query: HelperQueryTypePost, userId: string|null): Promise<ResultObject<PaginatorPostType>> {
 
-        const allPostWithPaginator = await this.postsQueryRepository.getAllPosts(query)
+        console.log("Im here")
+        const allPostWithPaginator = await this.postsQueryRepository.getAllPosts(query, userId)
 
         return {
             status: ResultStatus.Success,
@@ -160,15 +167,18 @@ export class PostsService{
 
         const foundedLikes = await this.feedBacksRepository.findLikesByUserAndParent(new ObjectId(id), userId);
 
+        const user = await usersRepository.findByID(new ObjectId(userId));
+
         //проверяем был ли создан лайк
         if (!foundedLikes) {
 
             //если нет, то создаем новый лайк и сохраняем его
-            const newLike = LikesModel.createLike(new ObjectId(id), userId, newStatusLike);
+            const newLike = LikesModel.createLike(new ObjectId(id), userId, user!.accountData.userName, newStatusLike);
             await this.feedBacksRepository.saveLikes(newLike);
 
             //в пост добавляем количество лайков по статусу
-            post.addCountLikes(newStatusLike);
+
+            post.addCountLikes(newStatusLike, userId, user!.accountData.userName);
             await this.postsRepository.save(post);
 
 
@@ -182,8 +192,8 @@ export class PostsService{
 
             //пересчитаем количество если отличаются новй статус от старого
             if (oldStatusLike !== newStatusLike) {
-                comment.recountLikes(oldStatusLike, newStatusLike)
-                await this.feedBacksRepository.saveComment(comment);
+                post.recountLikes(oldStatusLike, newStatusLike, userId, user!.accountData.userName)
+                await this.postsRepository.save(post);
             }
         }
 

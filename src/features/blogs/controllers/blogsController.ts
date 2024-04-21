@@ -9,28 +9,33 @@ import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTy
 import {PaginatorPostType} from "../../../input-output-types/posts/outputTypes";
 import {BlogsQueryRepository} from "../repositories/blogQueryRepository";
 import {injectable} from "inversify";
+import {PostsQueryRepository} from "../../posts/repositories/postsQueryRepository";
 
 @injectable()
 export class BlogsController {
     constructor(protected blogsService: BlogsService,
-                protected blogsQueryRepository: BlogsQueryRepository) {}
-    async postBlogsController(req: Request<ParamsType, TypeBlogInputModel>, res: Response<TypeBlogViewModel|null>) {
+                protected blogsQueryRepository: BlogsQueryRepository,
+                protected postsQueryRepository: PostsQueryRepository) {
+    }
+
+    async postBlogsController(req: Request<ParamsType, TypeBlogInputModel>, res: Response<TypeBlogViewModel | null>) {
 
         //NEW
         const resultObject = await this.blogsService.create(req.body);
 
-        if(resultObject.status === ResultStatus.InternalServerError){
+        if (resultObject.status === ResultStatus.InternalServerError) {
             res.sendStatus(500);
             return;
         }
 
-        if(resultObject.status === ResultStatus.Success){
+        if (resultObject.status === ResultStatus.Success) {
             res
                 .status(201)
                 .send(resultObject.data);
         }
 
     }
+
     async putBlogsController(req: Request<ParamsType, TypeBlogInputModel>, res: Response<TypeBlogViewModel>) {
 
         const resultObject = await this.blogsService.updateBlog(req.params.id, req.body);
@@ -40,12 +45,13 @@ export class BlogsController {
                 res.sendStatus(404)
                 return;
             }
-        } else if(resultObject.status === ResultStatus.Success){
+        } else if (resultObject.status === ResultStatus.Success) {
             res.status(204).send(resultObject.data);
             return;
         }
 
     }
+
     async deleteBlogsController(req: Request<ParamsType>, res: Response) {
 
         const resultObject = await this.blogsService.deleteBlog(req.params.id);
@@ -62,14 +68,15 @@ export class BlogsController {
             res.sendStatus(204);
         }
     }
-    async getBlogsControllerByID( req: Request<any, any, any, any>, res: Response<TypeBlogViewModel>) {
+
+    async getBlogsControllerByID(req: Request<any, any, any, any>, res: Response<TypeBlogViewModel>) {
 
         if (!ObjectId.isValid(req.params.id)) {
             res.sendStatus(404)
             return;
         }
         const foundBlog = await this.blogsQueryRepository.findForOutput(new ObjectId(req.params.id));
-        if(!foundBlog) {
+        if (!foundBlog) {
             res.sendStatus(404)
             return;
         }
@@ -77,11 +84,12 @@ export class BlogsController {
             .status(200)
             .send(foundBlog);
     }
+
     async getBlogsController(req: Request, res: Response) {
-        const helper = (query:any) => {
+        const helper = (query: any) => {
 
             const queryHelper: HelperQueryTypeBlog = {
-                searchNameTerm: query.searchNameTerm? query.searchNameTerm: null,
+                searchNameTerm: query.searchNameTerm ? query.searchNameTerm : null,
                 pageNumber: query.pageNumber ? +query.pageNumber : 1,
                 pageSize: query.pageSize ? +query.pageSize : 10,
                 sortBy: query.sortBy ? query.sortBy : 'createdAt',
@@ -99,9 +107,12 @@ export class BlogsController {
             .send(result.data);
 
     }
-    async postPostsForBlogsController(req: Request<{ blogId: string}, TypePostInputModelModel, any, any>, res: Response) {
 
-        const resultObject = await this.blogsService.createPostForBlog(req.body, req.params.blogId);
+    async postPostsForBlogsController(req: Request<{
+        blogId: string
+    }, TypePostInputModelModel, any, any>, res: Response) {
+
+        const resultObject = await this.blogsService.createPostForBlog(req.body, req.params.blogId, req.userId);
 
         if (resultObject.status === ResultStatus.NotFound) {
             res
@@ -115,9 +126,10 @@ export class BlogsController {
                 .send(resultObject.data!);
         }
     }
+
     async getPostsForBlogID(req: Request<any, any, any, any>, res: Response<PaginatorPostType>) {
 
-        const helper = (query: any):HelperQueryTypePost => {
+        const helper = (query: any): HelperQueryTypePost => {
             return {
                 pageNumber: query.pageNumber ? +query.pageNumber : 1,
                 pageSize: query.pageSize ? +query.pageSize : 10,
@@ -127,7 +139,7 @@ export class BlogsController {
 
         }
 
-        const answer = await this.blogsQueryRepository.getMany(helper(req.query), req.params.blogId);
+        const answer = await this.postsQueryRepository.getAllPosts(helper(req.query), req.userId, req.params.blogId);
         res
             .status(200)
             .send(answer);

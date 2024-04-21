@@ -49,7 +49,7 @@ export class BlogsService{
 
     }
 
-    async createPostForBlog(dto: TypePostInputModelModel, blogId: string): Promise<ResultObject<TypePostViewModel | null>> {
+    async createPostForBlog(dto: TypePostInputModelModel, blogId: string, userId: string|null): Promise<ResultObject<TypePostViewModel | null>> {
 
         if (!ObjectId.isValid(blogId)) {
             return {
@@ -78,7 +78,7 @@ export class BlogsService{
 
         await this.postsRepository.save(newPost);
 
-        const updatedPost = await this.postsQueryRepository.findForOutput(newPost._id)
+        const updatedPost = await this.postsQueryRepository.findForOutput(newPost._id, userId)
 
         return {
             status: ResultStatus.Success,

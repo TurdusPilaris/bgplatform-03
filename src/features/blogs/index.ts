@@ -1,6 +1,6 @@
 import {Router} from "express";
 import {
-    authMiddleware,
+    authMiddleware, authMiddlewareBearer, getUserIdWithoutAuth,
     inputValidationMiddleware,
     inputValidationMiddlewareBlogID,
     postInputValidatorBlog,
@@ -19,5 +19,5 @@ blogsRouter.get('/:id', blogsController.getBlogsControllerByID.bind(blogsControl
 blogsRouter.post('/', authMiddleware, postInputValidatorBlog, inputValidationMiddleware, blogsController.postBlogsController.bind(blogsController));
 blogsRouter.put('/:id', authMiddleware, postInputValidatorBlog, inputValidationMiddleware, blogsController.putBlogsController.bind(blogsController));
 blogsRouter.delete('/:id', authMiddleware, blogsController.deleteBlogsController.bind(blogsController));
-blogsRouter.get('/:blogId/posts', postInputValidatorBlogID, inputValidationMiddlewareBlogID, blogsController.getPostsForBlogID.bind(blogsController));
+blogsRouter.get('/:blogId/posts', getUserIdWithoutAuth, postInputValidatorBlogID, inputValidationMiddlewareBlogID, blogsController.getPostsForBlogID.bind(blogsController));
 blogsRouter.post('/:blogId/posts', authMiddleware, postInputValidatorPostWithoutBlogID, inputValidationMiddleware, blogsController.postPostsForBlogsController.bind(blogsController));

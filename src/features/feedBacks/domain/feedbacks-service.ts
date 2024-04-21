@@ -11,6 +11,7 @@ import {likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classe
 import {injectable} from "inversify";
 import {CommentDB} from "./commentModel";
 import {LikesModel} from "./likes.entity";
+import {usersRepository} from "../../../composition-root";
 
 @injectable()
 export class FeedbacksService {
@@ -158,11 +159,13 @@ export class FeedbacksService {
 
         const foundedLikes = await this.feedBacksRepository.findLikesByUserAndParent(new ObjectId(id), userId);
 
+        const user = await usersRepository.findByID(new ObjectId(userId));
+
         //проверяем был ли создан лайк
         if (!foundedLikes) {
 
             //если нет, то создаем новый лайк и сохраняем его
-            const newLike = LikesModel.createLike(new ObjectId(id), userId, newStatusLike);
+            const newLike = LikesModel.createLike(new ObjectId(id), userId, user!.accountData.userName, newStatusLike);
             await this.feedBacksRepository.saveLikes(newLike);
 
             //в комментарий добавляем количество лайков по статусу

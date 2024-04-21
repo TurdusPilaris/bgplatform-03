@@ -13,10 +13,8 @@ export type CommentatorInfoType = {
 export type LikesInfoType = {
     countLikes: number,
     countDislikes: number,
-    myStatus: likeStatus.None
+    myStatus: likeStatus
 }
-
-
 
 export class LikesForCommentsDB {
 
@@ -37,6 +35,7 @@ export class LikesForCommentsDB {
 export type LikesType = {
     parentID: ObjectId;
     userID: string,
+    login: string,
     statusLike: likeStatus,
     createdAt: Date,
     updatedAt: Date

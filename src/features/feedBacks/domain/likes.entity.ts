@@ -25,13 +25,12 @@ export const LikesSchema = new mongoose.Schema<WithId<LikesType>>({
 
 const likesStatics = {
 
-    createLike(parentID: ObjectId, userID: string, statusLike: likeStatus) {
+    createLike(parentID: ObjectId, userID: string, login: string, statusLike: likeStatus) {
 
-        const user = await usersRepository.findByID(new ObjectId(userID));
         const like = new LikesModel() as LikesDocument;
         like.parentID = parentID;
         like.userID = userID;
-        like.login = user.accountData.userName;
+        like.login = login;
         like.statusLike = statusLike;
 
         like.createdAt = new Date();
