@@ -10,6 +10,7 @@ export class PostsRepository{
 
         const result = await post.save();
         return result._id;
+
     }
     async findById(id: ObjectId): Promise<PostDocument| null> {
         return PostModel.findOne({_id: id})

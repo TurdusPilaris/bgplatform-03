@@ -3,7 +3,7 @@ import {TypePostInputModelModel} from "../../../input-output-types/posts/inputTy
 import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 
 import {BlogsQueryRepository} from "../../blogs/repositories/blogQueryRepository";
-import {PostModel} from "./postModel";
+import {PostDocument, PostModel} from "./postModel";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {ResultObject} from "../../../common/types/result.types";
 import {PostsQueryRepository} from "../repositories/postsQueryRepository";
@@ -14,7 +14,7 @@ import {injectable} from "inversify";
 import {likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classes";
 import {FeedBacksRepository} from "../../feedBacks/reepositories/feedBacksRepository";
 import {LikesModel} from "../../feedBacks/domain/likes.entity";
-import {usersRepository} from "../../../composition-root";
+import {feedBacksRepository, usersRepository} from "../../../composition-root";
 
 @injectable()
 export class PostsService{
@@ -25,8 +25,10 @@ export class PostsService{
         protected blogsRepository: BlogsRepository,
         protected blogsQueryRepository: BlogsQueryRepository,
         protected feedBacksRepository: FeedBacksRepository
-        ) {}
-    async create(dto: TypePostInputModelModel, userId: string|null): Promise<ResultObject<TypePostViewModel | null>> {
+    ) {
+    }
+
+    async create(dto: TypePostInputModelModel, userId: string | null): Promise<ResultObject<TypePostViewModel | null>> {
 
         const foundedBlog = await this.blogsQueryRepository.findForOutput(new ObjectId(dto.blogId));
 
@@ -60,11 +62,13 @@ export class PostsService{
         }
 
     }
+
     async find(id: ObjectId) {
 
         return this.postsRepository.findById(id);
 
     }
+
     async deletePost(id: string): Promise<ResultObject<null>> {
 
         if (!ObjectId.isValid(id)) {
@@ -97,7 +101,8 @@ export class PostsService{
             data: null
         }
     }
-    async updatePost(id: string, dto: TypePostInputModelModel, userId: string|null): Promise<ResultObject<TypePostViewModel | null>> {
+
+    async updatePost(id: string, dto: TypePostInputModelModel, userId: string | null): Promise<ResultObject<TypePostViewModel | null>> {
 
         if (!ObjectId.isValid(id)) {
             return {
@@ -124,9 +129,9 @@ export class PostsService{
             data: updatedPost
         }
     }
-    async getAllPosts(query: HelperQueryTypePost, userId: string|null): Promise<ResultObject<PaginatorPostType>> {
 
-        console.log("Im here")
+    async getAllPosts(query: HelperQueryTypePost, userId: string | null): Promise<ResultObject<PaginatorPostType>> {
+
         const allPostWithPaginator = await this.postsQueryRepository.getAllPosts(query, userId)
 
         return {
@@ -178,10 +183,30 @@ export class PostsService{
 
             //в пост добавляем количество лайков по статусу
 
-            post.addCountLikes(newStatusLike, userId, user!.accountData.userName);
+            const lastThreeLikes = await feedBacksRepository.findThreeLastLikesByParent(post._id);
+
+            console.log("lastThreeLikes----------------", lastThreeLikes);
+            let resultLastThreeLikes: { addedAt: Date; login: string; userId: string }[] = [];
+
+            if (lastThreeLikes) {
+                resultLastThreeLikes = lastThreeLikes.map(function (newestLikes) {
+                        return {
+                            userId: newestLikes.userID,
+                            addedAt: newestLikes.updatedAt,
+                            login: newestLikes.login
+                        }
+                    }
+                )
+            }
+            post.addCountLikes(newStatusLike, resultLastThreeLikes);
             await this.postsRepository.save(post);
 
-
+            {
+                return {
+                    status: ResultStatus.Success,
+                    data: null
+                }
+            }
         } else {
             //сохранили старый статус лайка для пересчета в комментарии
             const oldStatusLike = foundedLikes.statusLike;
@@ -192,17 +217,33 @@ export class PostsService{
 
             //пересчитаем количество если отличаются новй статус от старого
             if (oldStatusLike !== newStatusLike) {
-                post.recountLikes(oldStatusLike, newStatusLike, userId, user!.accountData.userName)
-                await this.postsRepository.save(post);
-            }
-        }
 
-        {
-            return {
-                status: ResultStatus.Success,
-                data: null
+                const lastThreeLikes = await feedBacksRepository.findThreeLastLikesByParent(post._id);
+
+                console.log("lastThreeLikes----------------", lastThreeLikes);
+                let resultLastThreeLikes: { addedAt: Date; login: string; userId: string }[] = [];
+
+                if (lastThreeLikes) {
+                    resultLastThreeLikes = lastThreeLikes.map(function (newestLikes) {
+                            return {
+                                userId: newestLikes.userID,
+                                addedAt: newestLikes.updatedAt,
+                                login: newestLikes.login
+                            }
+                        }
+                    )
+                }
+                post.recountLikes(oldStatusLike, newStatusLike, resultLastThreeLikes)
+                await this.postsRepository.save(post);
+
+            }
+
+            {
+                return {
+                    status: ResultStatus.Success,
+                    data: null
+                }
             }
         }
     }
 }
-

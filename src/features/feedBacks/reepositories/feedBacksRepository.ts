@@ -4,6 +4,7 @@ import {CommentInputModelType} from "../../../input-output-types/feedBacks/input
 import {injectable} from "inversify";
 
 import {LikesDocument, LikesModel} from "../domain/likes.entity";
+import {likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classes";
 
 @injectable()
 export class FeedBacksRepository {
@@ -35,6 +36,9 @@ export class FeedBacksRepository {
         return LikesModel.findOne({parentID: parentID, userID: userId})
     }
 
+    async findThreeLastLikesByParent(parentID: ObjectId): Promise<LikesDocument[] | null> {
+        return LikesModel.find({parentID: parentID, statusLike: likeStatus.Like}).sort({createdAt: -1}).limit(3).lean()
+    }
 
     async saveLikes(newLike: LikesDocument) {
 

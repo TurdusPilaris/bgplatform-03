@@ -4,7 +4,7 @@ import {
 import {ObjectId, WithId} from "mongodb";
 import {PaginatorPostType, TypePostViewModel} from "../../../input-output-types/posts/outputTypes";
 import {HelperQueryTypePost} from "../../../input-output-types/inputTypes";
-import {PostDBType, PostDocument, PostModel} from "../domain/postModel";
+import {NewestLikesType, PostDBType, PostDocument, PostModel} from "../domain/postModel";
 import {injectable} from "inversify";
 import {FeedBacksQueryRepository} from "../../feedBacks/reepositories/feedBackQueryRepository";
 import {likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classes";
@@ -26,8 +26,7 @@ export class PostsQueryRepository {
             return null
         }
         const myLike = await this.feedBacksQueryRepository.getLikesInfo(id.toString(), userId)
-        console.log("userrrrrid", userId)
-        console.log("myLike", myLike)
+
         return this.mapToOutput(foundPost, myLike);
     }
 
@@ -69,7 +68,6 @@ export class PostsQueryRepository {
             .lean();
 
         const postIds = posts.map((post) => post._id.toString());
-        console.log("userrrrrid", userId)
 
         const myStatusesForPosts = await this.feedBacksQueryRepository.getLikesByUser(postIds, userId);
         console.log("myStatusesForPosts", myStatusesForPosts)
@@ -77,7 +75,7 @@ export class PostsQueryRepository {
             myStatusesForPosts[post._id.toString()]?.statusLike));
 
 
-        const countPosts = await PostModel.countDocuments({});
+        const countPosts = await PostModel.countDocuments(filter);
         const paginatorPost: PaginatorPostType =
             {
                 pagesCount: Math.ceil(countPosts / query.pageSize),

@@ -1,7 +1,8 @@
-import {HydratedDocument, model, Model} from "mongoose";
+import mongoose, {HydratedDocument, model, Model} from "mongoose";
 import {ObjectId} from "mongodb";
-import mongoose from "mongoose";
 import {LikesInfoType, likeStatus} from "../../../input-output-types/feedBacks/feedBacka.classes";
+import {feedBacksRepository} from "../../../composition-root";
+import LastNewline from "nodemailer/lib/mime-node/last-newline";
 
 
 export type NewestLikesType = {
@@ -12,10 +13,12 @@ export type NewestLikesType = {
 export type NewestLikeType = {
     newestLikes: NewestLikesType[]
 }
+
 export class PostDBType {
     _id: ObjectId
     createdAt: Date
-     constructor(
+
+    constructor(
         public title: string,
         public shortDescription: string,
         public content: string,
@@ -36,6 +39,12 @@ type PostMethods = typeof postMethods;
 type PostModel = Model<PostDBType, {}, PostMethods> & PostStatics
 
 export type PostDocument = HydratedDocument<PostDBType, PostMethods>
+
+export const NewLikesSchema = new mongoose.Schema({
+    addedAt: {type: Date},
+    userId: {type: String},
+    login: {type: String},
+})
 export const PostSchema = new mongoose.Schema<PostDBType, PostModel, PostMethods>({
 
     title: {type: String, required: true, max: 30},
@@ -45,27 +54,22 @@ export const PostSchema = new mongoose.Schema<PostDBType, PostModel, PostMethods
     blogName: {type: String, required: true},
     createdAt: {type: Date},
     likesInfo: {
-        countLikes: {type: Number},
-        countDislikes: {type: Number},
+        countLikes: {type: Number, default: 0},
+        countDislikes: {type: Number, default: 0},
         myStatus: {
             type: String,
-            enum: ['Like', 'Dislike', 'None']
+            enum: ['Like', 'Dislike', 'None'],
+            default: likeStatus.None
         },
-        newestLikes: [
-            {
-                addedAt: {type: Date},
-                userId: {type: String},
-                login: String
-            }
-        ]
+        newestLikes: {default: [], type: [NewLikesSchema]}
     },
 
-})
+}, {optimisticConcurrency: true})
 
 const postStatics = {}
 const postMethods = {
 
-    addCountLikes(newStatusLike: likeStatus, userID: string, login: string) {
+    async addCountLikes(newStatusLike: likeStatus, resultLastThreeLikes: NewestLikesType[]) {
 
         if (newStatusLike === likeStatus.Like) {
             (this as PostDocument).likesInfo.countLikes += 1;
@@ -74,13 +78,11 @@ const postMethods = {
             (this as PostDocument).likesInfo.countDislikes += 1;
         }
 
-        (this as PostDocument).likesInfo.newestLikes.push({
-            addedAt: new Date(),
-            userId: userID,
-            login: login})
+        (this as PostDocument).likesInfo.newestLikes = [];
+        (this as PostDocument).likesInfo.newestLikes.push(...resultLastThreeLikes);
     },
 
-    recountLikes(oldStatusLike: likeStatus, newStatusLike: likeStatus, userID: string, login: string) {
+    async recountLikes(oldStatusLike: likeStatus, newStatusLike: likeStatus, resultLastThreeLikes: NewestLikesType[]) {
 
         let countLikes = 0;
         let countDislikes = 0;
@@ -112,25 +114,16 @@ const postMethods = {
             }
         }
 
+
         (this as PostDocument).likesInfo.countLikes += countLikes;
         (this as PostDocument).likesInfo.countDislikes += countDislikes;
 
-        // const newestLikes = (this as PostDocument).likesInfo.newestLikes;
-        // newestLikes.push({
-        //     addedAt: new Date(),
-        //     userID: userID,
-        //     login: login
-        // });
-        // (this as PostDocument).likesInfo.newestLikes = newestLikes.slice(1);
+        (this as PostDocument).likesInfo.newestLikes = [];
 
-        (this as PostDocument).likesInfo.newestLikes.push({
-            addedAt: new Date(),
-            userId: userID,
-            login: login
-        });
-        if((this as PostDocument).likesInfo.newestLikes.length > 3) {
-            (this as PostDocument).likesInfo.newestLikes.shift();
-        }
+        console.log("shoud be empty ----", (this as PostDocument).likesInfo.newestLikes);
+        (this as PostDocument).likesInfo.newestLikes.push(...resultLastThreeLikes);
+        console.log("shoud be 3 lendth ----", (this as PostDocument).likesInfo.newestLikes.length);
+
     }
 }
 

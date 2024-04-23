@@ -35,7 +35,7 @@ import {Container} from "inversify";
  export const usersQueryRepository = new UsersQueryRepository();
  export const usersRepository = new UsersRepository();
 
-// const feedBacksRepository = new FeedBacksRepository();
+export const feedBacksRepository = new FeedBacksRepository();
 // const feedBacksQueryRepository = new FeedBacksQueryRepository();
 // const securityQueryRepository = new SecurityQueryRepository();
 // const securityRepository = new SecurityRepository();
