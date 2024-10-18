@@ -115,7 +115,6 @@ export const authMiddlewareBearer = async (req:Request, res: Response, next: Nex
 
 export const getUserIdWithoutAuth = async (req:Request, res: Response, next: NextFunction) => {
 
-    console.log("Im here!!!!!!!!!")
     if(!req.headers.authorization) {
 
         req.userId = null;

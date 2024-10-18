@@ -9,7 +9,7 @@ import {add} from "date-fns";
 import {TypeBlogInputModel} from "../src/features/blogs/types/inputTypes";
 import {TypePostInputModelModel} from "../src/input-output-types/posts/inputTypes";
 import {SETTING} from "../src/main/setting";
-import {UserModel} from "../src/db/mongo/user/user.model";
+import {UserModel} from "../src/features/users/domain/entities/user.model";
 const CORRECT_ADMIN_AUTH_BASE64 = 'Basic YWRtaW46cXdlcnR5';
 export const testSeeder = {
     createUserDTO() {

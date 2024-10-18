@@ -6,7 +6,7 @@ import {UserQueryType} from "../../../input-output-types/inputTypes";
 import {MeViewModelType, PaginatorUserType, UserViewModelType} from "../../../input-output-types/users/outputTypes";
 import {ResultObject} from "../../../common/types/result.types";
 import {ResultStatus} from "../../../common/types/resultCode";
-import {UserModel} from "../../../db/mongo/user/user.model";
+import {UserModel} from "../domain/entities/user.model";
 import {injectable} from "inversify";
 @injectable()
 export class UsersQueryRepository{

@@ -2,7 +2,7 @@ import *as mongoose from "mongoose";
 import { WithId} from "mongodb";
 import {Model, model, HydratedDocument} from "mongoose";
 
- import {UserAccountDBType} from "../../../input-output-types/inputOutputTypesMongo";
+ import {UserAccountDBType} from "../../../../input-output-types/inputOutputTypesMongo";
 
 type UserModel = Model<WithId<UserAccountDBType>>
 

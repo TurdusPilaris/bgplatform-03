@@ -3,7 +3,7 @@ import {app} from "../src/main/app";
 import {SETTING} from "../src/main/setting";
 import {db} from "../src/db/mongo/mongo-db";
 import {jwtService} from "../src/common/adapters/jwt-service";
-import {userQueryRepository} from "../src/features/users/repositories/userQueryRepository";
+import {userQueryRepository} from "../src/features/users/infrastructure/userQueryRepository";
 import {createUser} from "./createUser";
 import {testSeeder} from "./test.seeder";
 

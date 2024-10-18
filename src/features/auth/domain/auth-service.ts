@@ -3,7 +3,7 @@ import {UserAccountDBType} from "../../../input-output-types/inputOutputTypesMon
 import {ObjectId, WithId} from "mongodb";
 import {v4 as uuidv4} from 'uuid';
 import {add} from "date-fns"
-import {UsersQueryRepository} from "../../users/repositories/userQueryRepository";
+import {UsersQueryRepository} from "../../users/infrastructure/userQueryRepository";
 import {ResultObject} from "../../../common/types/result.types";
 import {ResultStatus} from "../../../common/types/resultCode";
 import {BusinessService} from "../../../common/domain/business-service";
@@ -11,7 +11,7 @@ import {JWTService} from "../../../common/adapters/jwt-service";
 import {SETTING} from "../../../main/setting";
 import { PayloadTokenType} from "../../../input-output-types/common/common-types";
 import {NewPasswordRecoveryInputModel} from "../../../input-output-types/auth/inputTypes";
-import {UsersRepository} from "../../users/repositories/usersRepository";
+import {UsersRepository} from "../../users/infrastructure/usersRepository";
 import {DeviceAuthSessionsModel} from "../../../db/mongo/devicesAuthSessions/deviceAuthSession.model";
 import {injectable} from "inversify";
 
@@ -181,7 +181,6 @@ export class AuthService{
             data: null
         }
 
-        console.log("Hi test this user!", user)
         const newConfirmationCode = uuidv4();
 
         await this.usersRepository.updateConfirmationCode(user._id, newConfirmationCode, add(new Date(), {
@@ -274,8 +273,6 @@ export class AuthService{
 
         const session = await this.getSession(payloadRefreshToken.userId.toString(), payloadRefreshToken.deviceId!, new Date(fullPayload.iat*1000));
 
-        console.log("session", session);
-
         if (!session) {
 
             return {
@@ -301,8 +298,6 @@ export class AuthService{
 
         const payloadOldRefreshToken = await this.jwtService.decodeToken(refreshToken);
         const session = await this.getSession(payloadOldRefreshToken.userId, payloadOldRefreshToken.deviceId!, new Date(payloadOldRefreshToken.iat*1000));
-
-        const newDeviceId = uuidv4();
 
         const payLoadRefreshToken: PayloadTokenType = {userId: payloadOldRefreshToken.userId, deviceId: payloadOldRefreshToken.deviceId!};
         const newRefreshToken = await this.jwtService.createToken(payLoadRefreshToken, SETTING.AC_REFRESH_TIME, SETTING.JWT_REFRESH_SECRET);

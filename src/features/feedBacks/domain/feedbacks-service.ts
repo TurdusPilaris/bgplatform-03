@@ -1,5 +1,5 @@
 import {ObjectId} from "mongodb";
-import {UsersQueryRepository} from "../../users/repositories/userQueryRepository";
+import {UsersQueryRepository} from "../../users/infrastructure/userQueryRepository";
 import {CommentInputModelType} from "../../../input-output-types/feedBacks/inputTypes";
 import {PostsRepository,} from "../../posts/repositories/postsRepository";
 import {ResultStatus} from "../../../common/types/resultCode";

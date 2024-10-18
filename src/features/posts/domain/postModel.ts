@@ -119,10 +119,7 @@ const postMethods = {
         (this as PostDocument).likesInfo.countDislikes += countDislikes;
 
         (this as PostDocument).likesInfo.newestLikes = [];
-
-        console.log("shoud be empty ----", (this as PostDocument).likesInfo.newestLikes);
         (this as PostDocument).likesInfo.newestLikes.push(...resultLastThreeLikes);
-        console.log("shoud be 3 lendth ----", (this as PostDocument).likesInfo.newestLikes.length);
 
     }
 }

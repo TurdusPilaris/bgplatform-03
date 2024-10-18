@@ -7,13 +7,13 @@ import {PostsQueryRepository} from "./features/posts/repositories/postsQueryRepo
 import {PostsService} from "./features/posts/domain/posts-service";
 import {PostsRepository} from "./features/posts/repositories/postsRepository";
 import {FeedbacksService} from "./features/feedBacks/domain/feedbacks-service";
-import {UsersQueryRepository} from "./features/users/repositories/userQueryRepository";
+import {UsersQueryRepository} from "./features/users/infrastructure/userQueryRepository";
 import {FeedBacksRepository} from "./features/feedBacks/reepositories/feedBacksRepository";
 import {FeedBacksQueryRepository} from "./features/feedBacks/reepositories/feedBackQueryRepository";
 import {PostsController} from "./features/posts/controllers/postsController";
-import {UsersService} from "./features/users/domain/users-service";
-import {UsersRepository} from "./features/users/repositories/usersRepository";
-import {UsersController} from "./features/users/controllers/usersController";
+import {UsersService} from "./features/users/application/users-service";
+import {UsersRepository} from "./features/users/infrastructure/usersRepository";
+import {UsersController} from "./features/users/api/usersController";
 import {AuthService} from "./features/auth/domain/auth-service";
 import {BcryptService} from "./common/adapters/bcrypt-service";
 import {BusinessService} from "./common/domain/business-service";

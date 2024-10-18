@@ -62,7 +62,6 @@ export class PostsController {
     }
     async getPostsController (req: Request<any, any, any, any>, res: Response<PaginatorPostType>){
 
-        console.log("Im here1111111111")
         const helper = (query:any) => {
             const queryHelper: HelperQueryTypePost = {
                 pageNumber: query.pageNumber ? +query.pageNumber : 1,

@@ -1,6 +1,6 @@
 import {PostModel} from "../../posts/domain/postModel";
 import {BlogModel} from "../../../db/mongo/blog/blog.model";
-import {UserModel} from "../../../db/mongo/user/user.model";
+import {UserModel} from "../../users/domain/entities/user.model";
 import {CommentModel} from "../../feedBacks/domain/commentModel";
 import {DeviceAuthSessionsModel} from "../../../db/mongo/devicesAuthSessions/deviceAuthSession.model";
 import {CustomRateLimitModel} from "../../../db/mongo/customRateLimit/customRateLimit.model";

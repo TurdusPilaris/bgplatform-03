@@ -1,5 +1,5 @@
 import {UserDB} from "../../../input-output-types/inputOutputTypesMongo";
-import {UserDocument, UserModel} from "../../../db/mongo/user/user.model";
+import {UserDocument, UserModel} from "../domain/entities/user.model";
 import {ObjectId} from "mongodb";
 import {injectable} from "inversify";
 @injectable()
